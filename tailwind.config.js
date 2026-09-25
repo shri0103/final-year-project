@@ -7,26 +7,27 @@ export default {
   theme: {
     extend: {
       colors: {
-        darkbg: {
-          950: '#070a12',
-          900: '#0c101d',
-          850: '#111728',
-          800: '#182035',
-          700: '#222d47',
+        primary: {
+          DEFAULT: '#0D2137', // Deep Navy — headings
+          light: '#1A3A5C',
         },
-        emerald: {
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669',
+        secondary: {
+          DEFAULT: '#1565C0', // Royal Blue
+          light: '#1976D2',
         },
-        teal: {
-          400: '#2dd4bf',
-          500: '#14b8a6',
+        accent: {
+          DEFAULT: '#2196F3', // Sky Blue
+          glow: 'rgba(33, 150, 243, 0.25)',
         },
-        violet: {
-          400: '#a78bfa',
-          500: '#8b5cf6',
-          600: '#7c3aed',
+        highlight: {
+          DEFAULT: '#BBDEFB', // Light Blue tape
+        },
+        muted: '#374151',      // Dark gray — always readable!
+        background: {
+          DEFAULT: '#F7FBFF',  // Very light blue-white
+        },
+        card: {
+          DEFAULT: '#FFFFFF',
         },
       },
       fontFamily: {
@@ -39,8 +40,8 @@ export default {
       },
       keyframes: {
         glowPulse: {
-          '0%': { opacity: '0.4', transform: 'scale(1)' },
-          '100%': { opacity: '0.8', transform: 'scale(1.05)' },
+          '0%': { opacity: '0.5', transform: 'scale(1)' },
+          '100%': { opacity: '0.9', transform: 'scale(1.03)' },
         }
       }
     },
