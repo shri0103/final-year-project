@@ -92,6 +92,7 @@ export default function ArchitectureDiagram() {
       {/* ── Horizontal pipeline cards ────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         {STEPS.map((step, idx) => {
+          const openUp = idx >= STEPS.length - 2; // last 2 steps open upward
           const Icon = step.icon;
           const isOpen = expanded === idx;
           return (
@@ -146,7 +147,11 @@ export default function ArchitectureDiagram() {
               {/* Expanded detail — shows below on mobile, overlaid on desktop */}
               {isOpen && (
                 <div
-                  className="mt-2 card-elevated rounded-xl p-4 animate-fade-up lg:absolute lg:top-full lg:left-0 lg:right-0 lg:z-20 lg:mt-1"
+                  className={`mt-2 card-elevated rounded-xl p-4 animate-fade-up lg:absolute lg:left-0 lg:right-0 lg:z-20 ${
+                    openUp
+                      ? 'lg:bottom-full lg:mb-1'
+                      : 'lg:top-full lg:mt-1'
+                  }`}
                   style={{ borderColor: step.color + '30' }}
                 >
                   <div className="text-[10px] font-bold uppercase tracking-wider mb-2" style={{ color: step.color }}>

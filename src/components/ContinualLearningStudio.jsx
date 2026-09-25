@@ -187,7 +187,7 @@ export default function ContinualLearningStudio() {
             <span className="chip chip-slate text-[10px] ml-auto">{lexiconList.length} custom entries</span>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto max-h-[420px] overflow-y-auto">
             <table className="data-table">
               <thead>
                 <tr>
