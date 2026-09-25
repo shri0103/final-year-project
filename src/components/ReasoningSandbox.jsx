@@ -1,382 +1,303 @@
 import React, { useState } from 'react';
-import { 
-  TAMIL_SAMPLE_FEEDBACK, 
-  EMOTION_TYPES 
-} from '../data/tamilDataset';
-import { 
-  ResponsiveContainer, 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  Tooltip, 
-  Cell, 
-  RadarChart, 
-  PolarGrid, 
-  PolarAngleAxis, 
-  PolarRadiusAxis, 
-  Radar 
+import { TAMIL_SAMPLE_FEEDBACK, EMOTION_TYPES } from '../data/tamilDataset';
+import {
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, Cell
 } from 'recharts';
-import { 
-  BrainCircuit, 
-  Sparkles, 
-  Zap, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Flame, 
-  Smile, 
-  RefreshCw, 
-  Layers, 
-  ArrowRight, 
-  ChevronRight, 
-  MessageSquare, 
-  ShieldAlert, 
-  Cpu, 
-  CornerDownRight,
-  Send,
-  HelpCircle
+import {
+  BrainCircuit, Sparkles, Zap, AlertTriangle, CheckCircle2,
+  RefreshCw, MessageSquare, ShieldAlert, Cpu, Send
 } from 'lucide-react';
 
+/* ── small helpers ───────────────────────────────────────── */
+function UrgencyChip({ level }) {
+  const map = {
+    CRITICAL: 'urgency-critical',
+    HIGH:     'urgency-high',
+    NORMAL:   'urgency-normal',
+  };
+  return <span className={map[level] || 'urgency-normal'}>{level}</span>;
+}
+
+function SectionTitle({ icon: Icon, title, right }) {
+  return (
+    <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--border-subtle)]">
+      <div className="flex items-center gap-2">
+        <Icon className="w-4 h-4 text-teal-400" />
+        <h3 className="text-sm font-bold text-[var(--text-primary)]">{title}</h3>
+      </div>
+      {right}
+    </div>
+  );
+}
+
 export default function ReasoningSandbox() {
-  const [selectedSampleId, setSelectedSampleId] = useState(TAMIL_SAMPLE_FEEDBACK[0].id);
-  const [customInputText, setCustomInputText] = useState(TAMIL_SAMPLE_FEEDBACK[0].text);
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [selectedId, setSelectedId] = useState(TAMIL_SAMPLE_FEEDBACK[0].id);
+  const [inputText,  setInputText]  = useState(TAMIL_SAMPLE_FEEDBACK[0].text);
+  const [analyzing,  setAnalyzing]  = useState(false);
 
-  const activeSample = TAMIL_SAMPLE_FEEDBACK.find(s => s.id === selectedSampleId) || TAMIL_SAMPLE_FEEDBACK[0];
+  const sample = TAMIL_SAMPLE_FEEDBACK.find(s => s.id === selectedId) || TAMIL_SAMPLE_FEEDBACK[0];
 
-  const handleSelectSample = (sample) => {
-    setSelectedSampleId(sample.id);
-    setCustomInputText(sample.text);
-  };
-
+  const handleSelect = s => { setSelectedId(s.id); setInputText(s.text); };
   const handleAnalyze = () => {
-    setIsAnalyzing(true);
-    setTimeout(() => {
-      setIsAnalyzing(false);
-    }, 600);
+    setAnalyzing(true);
+    setTimeout(() => setAnalyzing(false), 800);
   };
 
-  // Prepare chart data for emotion distribution
-  const emotionChartData = Object.entries(activeSample.emotionDistribution).map(([name, value]) => {
-    const emotionConfig = EMOTION_TYPES.find(e => e.key === name) || { color: '#38bdf8' };
-    return {
-      name,
-      value,
-      color: emotionConfig.color
-    };
-  });
+  const chartData = Object.entries(sample.emotionDistribution).map(([name, value]) => ({
+    name,
+    value,
+    color: (EMOTION_TYPES.find(e => e.key === name) || {}).color || '#38bdf8',
+  }));
 
   return (
-    <div className="space-y-8">
-      {/* Top Banner Controls & Preset Selector */}
-      <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <BrainCircuit className="w-5 h-5 text-teal-400" />
-              <h2 className="text-xl font-extrabold text-white">Interactive Live Emotion Reasoning Workbench</h2>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Test Tamil customer feedback, analyze agglutinative morphology, and witness live sarcasm remapping.
-            </p>
-          </div>
+    <div className="space-y-5">
 
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-xs text-slate-400 font-medium hidden sm:inline">Try Test Presets:</span>
-            <div className="flex flex-wrap gap-1.5">
-              {TAMIL_SAMPLE_FEEDBACK.map((sample, idx) => (
-                <button
-                  key={sample.id}
-                  onClick={() => handleSelectSample(sample)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                    selectedSampleId === sample.id
-                      ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/20 font-bold'
-                      : 'bg-slate-900/90 text-slate-300 border border-slate-700/80 hover:border-teal-500/50 hover:text-white'
-                  }`}
-                >
-                  Case #{idx + 1}: {sample.title.split(' ')[0]}
-                </button>
-              ))}
-            </div>
-          </div>
+      {/* ── Page header ─────────────────────────────────── */}
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <BrainCircuit className="w-5 h-5 text-teal-400" />
+          <h1 className="text-xl font-extrabold text-[var(--text-primary)]">Reasoning Sandbox</h1>
+          <span className="chip chip-green ml-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Live
+          </span>
         </div>
+        <p className="text-sm text-[var(--text-secondary)]">
+          Test Tamil customer feedback — analyse morphology and witness sarcasm remapping in real time.
+        </p>
+      </div>
 
-        {/* Text Area Input */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
-              <MessageSquare className="w-4 h-4 text-teal-400" />
-              <span>Input Tamil Feedback (Tamil Script or Tanglish)</span>
-            </label>
-            <span className="text-xs text-teal-400 font-mono">
-              Channel: {activeSample.channel}
+      {/* ── Preset selector ──────────────────────────────── */}
+      <div className="flex flex-wrap gap-2 items-center">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-[var(--text-muted)]">Presets:</span>
+        {TAMIL_SAMPLE_FEEDBACK.map((s, idx) => (
+          <button
+            key={s.id}
+            onClick={() => handleSelect(s)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+              selectedId === s.id
+                ? 'bg-teal-500/15 text-teal-400 border-teal-500/40'
+                : 'bg-[var(--bg-elevated)] text-[var(--text-secondary)] border-[var(--border-default)] hover:border-[var(--border-strong)] hover:text-[var(--text-primary)]'
+            }`}
+          >
+            Case #{idx + 1}: {s.title.split(' ')[0]}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Split-screen main area ───────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        {/* LEFT — Input Panel */}
+        <div className="card p-5 space-y-4">
+          <SectionTitle
+            icon={MessageSquare}
+            title="Input Panel"
+            right={
+              <span className="chip chip-teal text-[10px]">{sample.channel}</span>
+            }
+          />
+
+          {/* Textarea */}
+          <div>
+            <label className="form-label">Tamil Feedback (Tamil script or Tanglish)</label>
+            <textarea
+              rows={4}
+              value={inputText}
+              onChange={e => setInputText(e.target.value)}
+              className="textarea-field font-tamil"
+              placeholder="உதாரண தமிழ் பின்னூட்டத்தை இங்கே தட்டச்சு செய்யவும்..."
+            />
+          </div>
+
+          {/* Metadata row */}
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-[var(--text-secondary)]">
+            <span>
+              <span className="text-[var(--text-muted)]">Transliteration: </span>
+              <span className="italic text-[var(--text-secondary)] font-mono text-[11px]">{sample.transliteration}</span>
+            </span>
+            <span>
+              <span className="text-[var(--text-muted)]">Brand: </span>
+              <span className="font-semibold text-teal-400">{sample.brand}</span>
             </span>
           </div>
 
-          <div className="relative">
-            <textarea
-              rows={3}
-              value={customInputText}
-              onChange={(e) => setCustomInputText(e.target.value)}
-              className="w-full bg-slate-950/90 border border-slate-700/80 rounded-xl px-4 py-3 text-slate-100 text-sm font-tamil focus:outline-none focus:border-teal-500 focus:ring-1 focus:ring-teal-500 leading-relaxed"
-              placeholder="உதாரண தமிழ் பின்னூட்டத்தை இங்கே தட்டச்சு செய்யவும்..."
-            />
+          {/* Analyze button */}
+          <button
+            onClick={handleAnalyze}
+            disabled={analyzing}
+            className="btn-primary w-full justify-center"
+          >
+            {analyzing
+              ? <><RefreshCw className="w-4 h-4 animate-spin" /> Parsing Morpho-Syntax…</>
+              : <><Sparkles className="w-4 h-4" /> Run Emotion Reasoning AI</>
+            }
+          </button>
 
-            <button
-              onClick={handleAnalyze}
-              disabled={isAnalyzing}
-              className="absolute bottom-3 right-3 flex items-center space-x-2 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 via-teal-500 to-violet-600 hover:from-emerald-400 hover:to-teal-400 text-slate-950 font-bold text-xs shadow-lg shadow-emerald-500/20 transition-all disabled:opacity-50"
-            >
-              {isAnalyzing ? (
-                <>
-                  <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
-                  <span>Parsing Morpho-Syntax...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4 text-slate-950 fill-current" />
-                  <span>Run Emotion Reasoning AI</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 pt-1">
-            <div className="flex items-center space-x-2">
-              <span className="font-semibold text-slate-300">Transliteration:</span>
-              <span className="italic text-slate-300 font-mono text-[11px]">{activeSample.transliteration}</span>
-            </div>
-            <div className="flex items-center space-x-1">
-              <span className="text-slate-400">Target Entity:</span>
-              <span className="font-semibold text-teal-300 bg-teal-950/80 px-2 py-0.5 rounded border border-teal-800/60">
-                {activeSample.brand}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Grid: Left Side Reasoning & Morphology, Right Side Charts & Action */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Column: Emotion Result & Morpho-Syntactic Breakdown (7 cols) */}
-        <div className="lg:col-span-7 space-y-6">
-          
-          {/* Main Reasoning Result Header Card */}
-          <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4 relative overflow-hidden">
-            <div className={`absolute top-0 right-0 px-4 py-1.5 rounded-bl-2xl text-xs font-bold font-mono ${
-              activeSample.sarcasmDetected 
-                ? 'bg-pink-950 text-pink-300 border-b border-l border-pink-700/60' 
-                : 'bg-emerald-950 text-emerald-300 border-b border-l border-emerald-700/60'
-            }`}>
-              {activeSample.sarcasmDetected ? '⚡ SARCASM FLIP DETECTED' : '✓ DIRECT EMOTION MATCH'}
-            </div>
-
-            <div className="space-y-1">
-              <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider">AI Classification Output</div>
-              <h3 className="text-2xl font-extrabold text-white flex items-center space-x-3">
-                <span className="text-teal-400">{activeSample.actualEmotion}</span>
-                <span className="text-xs font-semibold bg-teal-950 text-teal-300 px-2.5 py-1 rounded-full border border-teal-800">
-                  {activeSample.confidence}% Confidence
-                </span>
-              </h3>
-            </div>
-
-            {/* Contrast Box: Baseline vs Our Model */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="bg-red-950/30 border border-red-900/50 rounded-xl p-3.5 space-y-1">
-                <div className="flex items-center justify-between text-xs font-bold text-red-400">
-                  <span>Standard Baseline (mBERT / MuRIL)</span>
-                  <span className="text-[10px] bg-red-900/60 text-red-200 px-1.5 py-0.5 rounded">FAILED</span>
-                </div>
-                <div className="text-xs font-semibold text-slate-200">{activeSample.baselineResult.predictedEmotion}</div>
-                <div className="text-[11px] text-red-300/80 leading-tight">
-                  Misread literal keyword praise while failing on morphological context.
-                </div>
+          {/* Idiom alert */}
+          {sample.idiomsIdentified?.length > 0 && (
+            <div className="card-elevated p-3.5 rounded-xl space-y-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-violet-400">
+                <Zap className="w-3.5 h-3.5" />
+                <span>Sarcasm Remapper Triggered</span>
               </div>
-
-              <div className="bg-emerald-950/30 border border-emerald-900/50 rounded-xl p-3.5 space-y-1">
-                <div className="flex items-center justify-between text-xs font-bold text-emerald-400">
-                  <span>Our Proposed Model</span>
-                  <span className="text-[10px] bg-emerald-900/60 text-emerald-200 px-1.5 py-0.5 rounded">PASSED</span>
-                </div>
-                <div className="text-xs font-semibold text-emerald-200">{activeSample.ourModelResult.predictedEmotion}</div>
-                <div className="text-[11px] text-emerald-300/80 leading-tight">
-                  Successfully isolated suffixes and identified contextual contradiction.
-                </div>
-              </div>
-            </div>
-
-            {/* Explainable AI Reasoning Notes */}
-            <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-4 space-y-2">
-              <div className="flex items-center space-x-2 text-xs font-bold text-teal-400 uppercase tracking-wider">
-                <Sparkles className="w-4 h-4" />
-                <span>Explainable AI (XAI) Reasoning Trace</span>
-              </div>
-              <p className="text-xs text-slate-300 leading-relaxed font-sans">
-                {activeSample.ourModelResult.reasoning}
-              </p>
-            </div>
-          </div>
-
-          {/* Morpho-Syntactic Tokenization Table */}
-          <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center space-x-2">
-                <Cpu className="w-5 h-5 text-teal-400" />
-                <h3 className="text-base font-bold text-white">Morpho-Syntactic Tokenizer Breakdown</h3>
-              </div>
-              <span className="text-xs text-slate-400 font-mono">
-                {activeSample.morphologyBreakdown.length} Tokens Parsed
-              </span>
-            </div>
-
-            <p className="text-xs text-slate-400">
-              Tamil is an agglutinative language where suffixes carry tense, aspect, mood, and emotion polarity. Below is the isolated root and suffix breakdown for the input:
-            </p>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
-                    <th className="py-2.5 px-3">Token</th>
-                    <th className="py-2.5 px-3">Root Lemma</th>
-                    <th className="py-2.5 px-3">POS / Inflection Suffix</th>
-                    <th className="py-2.5 px-3">Semantic & Emotion Role</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60 font-sans">
-                  {activeSample.morphologyBreakdown.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-slate-900/60 transition-colors">
-                      <td className="py-2.5 px-3 font-semibold text-teal-300 font-tamil text-sm">
-                        {item.token}
-                      </td>
-                      <td className="py-2.5 px-3 text-slate-200 font-tamil">
-                        {item.root}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-slate-900 text-purple-300 border border-purple-900/50">
-                          {item.pos} {item.suffix ? `(${item.suffix})` : ''}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 text-slate-300">
-                        {item.semantic}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Idiom & Culturally Grounded Match Drawer */}
-            {activeSample.idiomsIdentified && activeSample.idiomsIdentified.length > 0 && (
-              <div className="bg-purple-950/20 border border-purple-800/40 rounded-xl p-4 space-y-2">
-                <div className="flex items-center space-x-2 text-xs font-bold text-purple-300 uppercase tracking-wider">
-                  <Zap className="w-4 h-4 text-purple-400" />
-                  <span>Tamil Cultural Idiom & Sarcasm Remapper Triggered</span>
-                </div>
-                {activeSample.idiomsIdentified.map((idiom, idx) => (
-                  <div key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between text-xs bg-purple-900/30 p-2.5 rounded-lg border border-purple-800/30 gap-2">
-                    <div>
-                      <span className="font-bold text-purple-200 font-tamil text-sm">{idiom.idiom}</span>
-                      <p className="text-[11px] text-purple-300/80">{idiom.meaning}</p>
-                    </div>
-                    <span className="px-2 py-1 rounded text-[10px] font-bold bg-pink-950 text-pink-300 border border-pink-700/50 self-start sm:self-auto">
-                      Polarity: {idiom.polarity}
-                    </span>
+              {sample.idiomsIdentified.map((idiom, idx) => (
+                <div key={idx} className="flex items-start justify-between gap-3 text-xs">
+                  <div>
+                    <div className="font-bold text-violet-300 font-tamil text-sm">{idiom.idiom}</div>
+                    <div className="text-[var(--text-muted)] text-[11px]">{idiom.meaning}</div>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
+                  <span className="chip chip-pink text-[10px] flex-shrink-0">{idiom.polarity}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Right Column: Radar & Bar Charts + Actionable Escalation Engine (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
+        {/* RIGHT — Output Panel */}
+        <div className="space-y-4">
+          {/* Classification result */}
+          <div className={`card p-5 relative overflow-hidden border ${
+            sample.sarcasmDetected
+              ? 'border-pink-500/25 bg-gradient-to-br from-[var(--bg-surface)] to-pink-950/10'
+              : 'border-teal-500/20 bg-gradient-to-br from-[var(--bg-surface)] to-teal-950/10'
+          }`}>
+            {/* Sarcasm badge */}
+            <span className={`absolute top-0 right-0 px-3 py-1 text-[10px] font-bold rounded-bl-xl ${
+              sample.sarcasmDetected
+                ? 'bg-pink-500/15 text-pink-400 border-b border-l border-pink-500/25'
+                : 'bg-teal-500/15 text-teal-400 border-b border-l border-teal-500/25'
+            }`}>
+              {sample.sarcasmDetected ? '⚡ SARCASM FLIP' : '✓ DIRECT MATCH'}
+            </span>
 
-          {/* Emotion Probability Radar / Bar Chart */}
-          <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center space-x-2">
-                <Flame className="w-5 h-5 text-teal-400" />
-                <h3 className="text-base font-bold text-white">Fine-Grained Emotion Distribution</h3>
-              </div>
-              <span className="text-xs text-slate-400 font-mono">7 Classes</span>
+            <div className="text-[10px] font-semibold uppercase tracking-widest text-[var(--text-muted)] mb-1">
+              AI Classification Output
+            </div>
+            <div className="flex items-baseline gap-3 mb-4">
+              <span className="text-2xl font-extrabold text-gradient-teal">{sample.actualEmotion}</span>
+              <span className="chip chip-teal">{sample.confidence}% confidence</span>
+              <UrgencyChip level={sample.urgency} />
             </div>
 
-            {/* Bar Chart Visualizer */}
-            <div className="h-64 w-full pt-2">
+            {/* Baseline vs Ours */}
+            <div className="grid grid-cols-2 gap-2.5 mb-4">
+              <div className="bg-red-950/20 border border-red-500/15 rounded-xl p-3">
+                <div className="text-[10px] font-bold text-red-400 uppercase mb-1 flex items-center justify-between">
+                  mBERT Baseline <span className="chip chip-red text-[9px]">FAIL</span>
+                </div>
+                <div className="text-xs font-semibold text-[var(--text-secondary)]">{sample.baselineResult.predictedEmotion}</div>
+              </div>
+              <div className="bg-teal-950/20 border border-teal-500/15 rounded-xl p-3">
+                <div className="text-[10px] font-bold text-teal-400 uppercase mb-1 flex items-center justify-between">
+                  Our Model <span className="chip chip-green text-[9px]">PASS</span>
+                </div>
+                <div className="text-xs font-semibold text-[var(--text-secondary)]">{sample.ourModelResult.predictedEmotion}</div>
+              </div>
+            </div>
+
+            {/* XAI reasoning */}
+            <div className="bg-[var(--bg-base)] rounded-xl p-3.5 border border-[var(--border-subtle)]">
+              <div className="text-[10px] font-bold uppercase tracking-wider text-teal-400 mb-1.5">
+                XAI Reasoning Trace
+              </div>
+              <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{sample.ourModelResult.reasoning}</p>
+            </div>
+          </div>
+
+          {/* Emotion distribution bar chart */}
+          <div className="card p-5">
+            <SectionTitle
+              icon={Sparkles}
+              title="Emotion Distribution"
+              right={<span className="text-[11px] text-[var(--text-muted)] font-mono">7 classes</span>}
+            />
+            <div className="h-52 w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={emotionChartData} layout="vertical" margin={{ top: 5, right: 30, left: 40, bottom: 5 }}>
-                  <XAxis type="number" domain={[0, 100]} stroke="#64748b" textAnchor="end" tick={{ fontSize: 10 }} />
-                  <YAxis type="category" dataKey="name" stroke="#94a3b8" tick={{ fontSize: 11, fontWeight: 600 }} width={95} />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '8px', color: '#f8fafc', fontSize: '12px' }} 
-                    formatter={(val) => [`${val}%`, 'Intensity']}
+                <BarChart data={chartData} layout="vertical" margin={{ top: 0, right: 20, left: 55, bottom: 0 }}>
+                  <XAxis type="number" domain={[0, 100]} stroke="#4a5568" tick={{ fontSize: 10, fill: '#8b9eb5' }} />
+                  <YAxis
+                    type="category" dataKey="name" stroke="transparent"
+                    tick={{ fontSize: 11, fontWeight: 600, fill: '#8b9eb5' }} width={60}
+                  />
+                  <Tooltip
+                    contentStyle={{ background: 'var(--bg-elevated)', border: '1px solid var(--border-default)', borderRadius: 10, fontSize: 12, color: 'var(--text-primary)' }}
+                    formatter={v => [`${v}%`, 'Intensity']}
                   />
                   <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-                    {emotionChartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
+                    {chartData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
-
-            <div className="grid grid-cols-2 gap-2 text-center text-xs pt-2 border-t border-slate-800">
-              <div className="p-2 rounded bg-slate-900 border border-slate-800">
-                <span className="text-slate-400 block text-[10px]">Dominant Emotion</span>
-                <span className="font-bold text-teal-300">{activeSample.actualEmotion}</span>
-              </div>
-              <div className="p-2 rounded bg-slate-900 border border-slate-800">
-                <span className="text-slate-400 block text-[10px]">Urgency Flag</span>
-                <span className={`font-bold ${
-                  activeSample.urgency === 'CRITICAL' ? 'text-red-400' :
-                  activeSample.urgency === 'HIGH' ? 'text-amber-400' : 'text-emerald-400'
-                }`}>
-                  {activeSample.urgency}
-                </span>
-              </div>
-            </div>
           </div>
-
-          {/* Actionable Customer Support Escalation Engine */}
-          <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
-            <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
-              <ShieldAlert className="w-5 h-5 text-amber-400" />
-              <h3 className="text-base font-bold text-white">Actionable Customer Escalation</h3>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex items-start space-x-3 p-3 rounded-xl bg-amber-950/30 border border-amber-800/40">
-                <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <span className="text-xs font-bold text-amber-300">Recommended Resolution Protocol</span>
-                  <p className="text-xs text-slate-300 leading-normal">
-                    {activeSample.suggestedAction}
-                  </p>
-                </div>
-              </div>
-
-              {/* Automated Response Recommendation in Tamil */}
-              <div className="space-y-2 pt-1">
-                <label className="text-xs font-semibold text-slate-300 flex items-center justify-between">
-                  <span>Automated Context-Aware Tamil Response Draft:</span>
-                  <span className="text-[10px] text-cyan-400 font-mono">Auto-Generated</span>
-                </label>
-                <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-xs font-tamil text-slate-200 leading-relaxed">
-                  {activeSample.urgency === 'CRITICAL' || activeSample.urgency === 'HIGH' ? (
-                    `வணக்கம்! உங்கள் கருத்து எங்களுக்கு மிக முக்கியம். ஏற்பட்ட சிரமத்திற்கு வருந்துகிறோம். உங்கள் பிரச்சினை உடனடியாக உயர் அதிகாரிகளுக்கு மாற்றப்பட்டு 15 நிமிடங்களில் தீர்க்கப்படும்.`
-                  ) : (
-                    `வணக்கம்! உங்கள் அன்பான ஆதரவிற்கு நன்றி. எங்களின் சேவையை தொடர்ந்து சிறந்த முறையில் வழங்க உறுதிபூண்டுள்ளோம்!`
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
+
+      {/* ── Morphology Table (full width, collapsible feel) ── */}
+      <div className="card p-5">
+        <SectionTitle
+          icon={Cpu}
+          title="Morpho-Syntactic Tokenizer Breakdown"
+          right={<span className="chip chip-violet text-[10px]">{sample.morphologyBreakdown.length} tokens</span>}
+        />
+        <p className="text-xs text-[var(--text-secondary)] mb-4">
+          Tamil is agglutinative — suffixes carry tense, aspect, mood and emotion polarity.
+          Each token's root and suffix are isolated below.
+        </p>
+        <div className="overflow-x-auto rounded-xl border border-[var(--border-subtle)]">
+          <table className="data-table">
+            <thead>
+              <tr>
+                <th>Token</th>
+                <th>Root</th>
+                <th>POS / Suffix</th>
+                <th>Semantic Role</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sample.morphologyBreakdown.map((item, idx) => (
+                <tr key={idx}>
+                  <td className="font-bold text-teal-400 font-tamil text-sm">{item.token}</td>
+                  <td className="text-[var(--text-primary)] font-tamil">{item.root}</td>
+                  <td>
+                    <span className="chip chip-violet text-[10px] font-mono">
+                      {item.pos}{item.suffix ? ` (${item.suffix})` : ''}
+                    </span>
+                  </td>
+                  <td className="text-[var(--text-secondary)]">{item.semantic}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── Escalation panel ─────────────────────────────── */}
+      <div className="card p-5">
+        <SectionTitle icon={ShieldAlert} title="Actionable Escalation" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-4">
+            <div className="flex items-center gap-2 mb-2">
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <span className="text-xs font-bold text-amber-400">Resolution Protocol</span>
+            </div>
+            <p className="text-xs text-[var(--text-secondary)] leading-relaxed">{sample.suggestedAction}</p>
+          </div>
+          <div className="bg-[var(--bg-base)] rounded-xl p-4 border border-[var(--border-subtle)]">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-bold text-[var(--text-secondary)]">Auto-Generated Tamil Response</span>
+              <span className="chip chip-teal text-[9px]">AI Draft</span>
+            </div>
+            <p className="text-xs font-tamil text-[var(--text-secondary)] leading-relaxed">
+              {sample.urgency === 'CRITICAL' || sample.urgency === 'HIGH'
+                ? 'வணக்கம்! உங்கள் கருத்து எங்களுக்கு மிக முக்கியம். ஏற்பட்ட சிரமத்திற்கு வருந்துகிறோம். உங்கள் பிரச்சினை உடனடியாக தீர்க்கப்படும்.'
+                : 'வணக்கம்! உங்கள் அன்பான ஆதரவிற்கு நன்றி. தொடர்ந்து சிறந்த சேவை வழங்க உறுதிபூண்டுள்ளோம்!'}
+            </p>
+          </div>
+        </div>
+      </div>
+
     </div>
   );
 }

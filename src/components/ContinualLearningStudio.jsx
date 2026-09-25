@@ -1,252 +1,235 @@
 import React, { useState } from 'react';
 import { INITIAL_SLANG_LEXICON, MORPHOLOGICAL_SUFFIX_RULES, CONTINUAL_LEARNING_STATS } from '../data/lexiconData';
-import { 
-  Layers, 
-  Plus, 
-  RefreshCw, 
-  CheckCircle2, 
-  Database, 
-  ShieldCheck, 
-  TrendingUp, 
-  BrainCircuit, 
-  BookOpen, 
-  Sparkles,
-  Zap
+import {
+  Layers, Plus, RefreshCw, CheckCircle2, Database,
+  ShieldCheck, TrendingUp, BookOpen, Sparkles, Zap, Trash2
 } from 'lucide-react';
+
+function StatCard({ label, value, sub, color = 'text-teal-400' }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-label">{label}</div>
+      <div className={`stat-value ${color}`}>{value}</div>
+      <div className="text-[11px] text-[var(--text-muted)] mt-1">{sub}</div>
+    </div>
+  );
+}
+
+const POLARITY_COLORS = {
+  'High Frustration': 'chip-red',
+  'Sarcasm Marker':   'chip-pink',
+  'Extremely Negative': 'chip-red',
+  'High Delight':     'chip-green',
+  'Disappointment':   'chip-amber',
+};
 
 export default function ContinualLearningStudio() {
   const [lexiconList, setLexiconList] = useState(INITIAL_SLANG_LEXICON);
-  const [newTerm, setNewTerm] = useState('');
-  const [newMeaning, setNewMeaning] = useState('');
-  const [newSentiment, setNewSentiment] = useState('High Frustration');
-  const [isAdapting, setIsAdapting] = useState(false);
+  const [newTerm,      setNewTerm]     = useState('');
+  const [newMeaning,   setNewMeaning]  = useState('');
+  const [newSentiment, setNewSentiment]= useState('High Frustration');
+  const [isAdapting,   setIsAdapting]  = useState(false);
+  const [lastAdded,    setLastAdded]   = useState(null);
 
-  const handleAddTerm = (e) => {
+  const handleAdd = e => {
     e.preventDefault();
     if (!newTerm.trim()) return;
-
-    const newItem = {
+    const item = {
       term: newTerm.trim(),
-      category: "User Added Slang",
+      category: 'User Added Slang',
       sentiment: newSentiment,
-      meaning: newMeaning || "Newly observed colloquial expression",
-      addedInEpoch: "Live Session",
-      memoryWeight: 0.95
+      meaning: newMeaning || 'Newly observed colloquial expression',
+      addedInEpoch: 'Live Session',
+      memoryWeight: 0.95,
     };
-
-    setLexiconList([newItem, ...lexiconList]);
-    setNewTerm('');
-    setNewMeaning('');
-    
-    // Simulate Continual Adaptation step
+    setLexiconList([item, ...lexiconList]);
+    setLastAdded(item.term);
+    setNewTerm(''); setNewMeaning('');
     setIsAdapting(true);
-    setTimeout(() => {
-      setIsAdapting(false);
-    }, 800);
+    setTimeout(() => { setIsAdapting(false); setLastAdded(null); }, 1200);
   };
 
+  const handleRemove = idx => setLexiconList(list => list.filter((_, i) => i !== idx));
+
   return (
-    <div className="space-y-8">
-      {/* Studio Header */}
-      <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <Layers className="w-5 h-5 text-purple-400" />
-              <h2 className="text-xl font-extrabold text-white">Continual Adaptation & Lexicon Studio</h2>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Dynamic vocabulary expansion using Elastic Weight Consolidation (EWC) to learn evolving Tamil youth slang without catastrophic forgetting.
-            </p>
-          </div>
+    <div className="space-y-5">
 
-          <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 rounded-full text-xs font-bold bg-purple-950 text-purple-300 border border-purple-800/60 flex items-center space-x-1">
-              <ShieldCheck className="w-4 h-4 text-purple-400" />
-              <span>Catastrophic Protection: {CONTINUAL_LEARNING_STATS.catastrophicForgettingProtection}</span>
-            </span>
-          </div>
+      {/* ── Page header ─────────────────────────────────── */}
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <Layers className="w-5 h-5 text-violet-400" />
+          <h1 className="text-xl font-extrabold text-[var(--text-primary)]">Continual Learning Studio</h1>
+          <span className="chip chip-violet ml-1">EWC Active</span>
         </div>
-
-        {/* EWC Stats Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1">
-            <div className="text-[11px] text-slate-400 font-semibold uppercase">Active Lexicon Size</div>
-            <div className="text-xl font-extrabold text-cyan-400">{lexiconList.length + 14810} Words</div>
-            <div className="text-[10px] text-slate-400">Dynamic vocabulary buffer</div>
-          </div>
-
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1">
-            <div className="text-[11px] text-slate-400 font-semibold uppercase">EWC Penalty Lambda (λ)</div>
-            <div className="text-xl font-extrabold text-purple-400">{CONTINUAL_LEARNING_STATS.ewcPenaltyLambda}</div>
-            <div className="text-[10px] text-slate-400">Fisher information matrix weight</div>
-          </div>
-
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1">
-            <div className="text-[11px] text-slate-400 font-semibold uppercase">Memory Replay Capacity</div>
-            <div className="text-xl font-extrabold text-emerald-400">{CONTINUAL_LEARNING_STATS.replayBufferCapacity}</div>
-            <div className="text-[10px] text-slate-400">Synthetically augmented pairs</div>
-          </div>
-
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-1">
-            <div className="text-[11px] text-slate-400 font-semibold uppercase">Adaptation Epochs</div>
-            <div className="text-xl font-extrabold text-amber-400">{CONTINUAL_LEARNING_STATS.adaptationEpochs} Updates</div>
-            <div className="text-[10px] text-slate-400">Zero full retrain requirement</div>
-          </div>
-        </div>
+        <p className="text-sm text-[var(--text-secondary)]">
+          Dynamic vocabulary expansion with Elastic Weight Consolidation — learn new Tamil slang without catastrophic forgetting.
+        </p>
       </div>
 
-      {/* Main Grid: Add New Slang Form & Lexicon Manager */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left Column: Form & Suffix Rules (5 cols) */}
-        <div className="lg:col-span-5 space-y-6">
-          
-          {/* Add Slang Form */}
-          <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
-            <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
-              <Plus className="w-5 h-5 text-cyan-400" />
-              <h3 className="text-base font-bold text-white">Inject New Tamil Slang / Code-Mix</h3>
+      {/* ── KPI stats ───────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          label="Active Lexicon"
+          value={`${lexiconList.length + 14810}`}
+          sub="Dynamic vocabulary buffer"
+          color="text-teal-400"
+        />
+        <StatCard
+          label="EWC Penalty λ"
+          value={CONTINUAL_LEARNING_STATS.ewcPenaltyLambda}
+          sub="Fisher information weight"
+          color="text-violet-400"
+        />
+        <StatCard
+          label="Replay Capacity"
+          value={CONTINUAL_LEARNING_STATS.replayBufferCapacity}
+          sub="Synthetic augmented pairs"
+          color="text-emerald-400"
+        />
+        <StatCard
+          label="Adaptation Epochs"
+          value={`${CONTINUAL_LEARNING_STATS.adaptationEpochs}`}
+          sub="Zero full retrain required"
+          color="text-amber-400"
+        />
+      </div>
+
+      {/* ── Main split ──────────────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
+
+        {/* LEFT: Form + Suffix rules */}
+        <div className="lg:col-span-2 space-y-4">
+
+          {/* Add term form */}
+          <div className="card p-5">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[var(--border-subtle)]">
+              <Plus className="w-4 h-4 text-teal-400" />
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Inject New Slang</h3>
             </div>
 
-            <form onSubmit={handleAddTerm} className="space-y-4">
+            <form onSubmit={handleAdd} className="space-y-3">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
-                  Tamil Word / Slang Phrase:
-                </label>
+                <label className="form-label">Tamil Word / Phrase</label>
                 <input
-                  type="text"
-                  value={newTerm}
-                  onChange={(e) => setNewTerm(e.target.value)}
-                  placeholder="e.g. செம மாஸ், வேஸ்ட் டா, லேக் ஆகுது..."
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 font-tamil focus:outline-none focus:border-cyan-500"
+                  type="text" value={newTerm}
+                  onChange={e => setNewTerm(e.target.value)}
+                  placeholder="e.g. செம மாஸ், வேஸ்ட் டா…"
+                  className="input-field font-tamil"
                   required
                 />
               </div>
-
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
-                  Cultural Meaning / Context:
-                </label>
+                <label className="form-label">Cultural Meaning</label>
                 <input
-                  type="text"
-                  value={newMeaning}
-                  onChange={(e) => setNewMeaning(e.target.value)}
+                  type="text" value={newMeaning}
+                  onChange={e => setNewMeaning(e.target.value)}
                   placeholder="e.g. Slang for severe performance lag"
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-cyan-500"
+                  className="input-field"
                 />
               </div>
-
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1">
-                  Target Sentiment / Emotion Polarity:
-                </label>
+                <label className="form-label">Emotion Polarity</label>
                 <select
                   value={newSentiment}
-                  onChange={(e) => setNewSentiment(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyan-500"
+                  onChange={e => setNewSentiment(e.target.value)}
+                  className="select-field"
                 >
-                  <option value="High Frustration">High Frustration (மன உளைச்சல்)</option>
-                  <option value="Sarcasm Marker">Sarcasm Marker (நையாண்டி)</option>
-                  <option value="Extremely Negative">Extremely Negative (கடுமையான எதிர்மறை)</option>
-                  <option value="High Delight">High Delight (மகிழ்ச்சி)</option>
-                  <option value="Disappointment">Disappointment (ஏமாற்றம்)</option>
+                  <option>High Frustration</option>
+                  <option>Sarcasm Marker</option>
+                  <option>Extremely Negative</option>
+                  <option>High Delight</option>
+                  <option>Disappointment</option>
                 </select>
               </div>
 
-              <button
-                type="submit"
-                disabled={isAdapting}
-                className="w-full flex items-center justify-center space-x-2 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-500/20 transition-all disabled:opacity-50"
-              >
-                {isAdapting ? (
-                  <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
-                    <span>Executing EWC Weight Consolidation...</span>
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="w-4 h-4" />
-                    <span>Adapt Model Memory (Zero Retrain)</span>
-                  </>
-                )}
+              <button type="submit" disabled={isAdapting} className="btn-primary w-full justify-center">
+                {isAdapting
+                  ? <><RefreshCw className="w-4 h-4 animate-spin" /> Consolidating EWC weights…</>
+                  : <><Sparkles className="w-4 h-4" /> Adapt Model (Zero Retrain)</>
+                }
               </button>
+
+              {lastAdded && (
+                <div className="flex items-center gap-2 text-xs text-emerald-400 animate-fade-in">
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>"{lastAdded}" added to active lexicon</span>
+                </div>
+              )}
             </form>
           </div>
 
-          {/* Morphological Inflection Rules Card */}
-          <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
-            <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
-              <BookOpen className="w-5 h-5 text-cyan-400" />
-              <h3 className="text-base font-bold text-white">Agglutinative Suffix Rules</h3>
+          {/* Suffix rules */}
+          <div className="card p-5">
+            <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[var(--border-subtle)]">
+              <BookOpen className="w-4 h-4 text-violet-400" />
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Agglutinative Suffix Rules</h3>
             </div>
-
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {MORPHOLOGICAL_SUFFIX_RULES.map((rule, idx) => (
-                <div key={idx} className="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs space-y-1">
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-cyan-300 font-mono">{rule.suffix}</span>
-                    <span className="text-[10px] text-slate-400">{rule.function}</span>
+                <div key={idx} className="card-elevated rounded-xl p-3 text-xs">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-bold text-teal-400 font-mono">{rule.suffix}</span>
+                    <span className="text-[10px] text-[var(--text-muted)]">{rule.function}</span>
                   </div>
-                  <div className="text-slate-200 font-tamil">{rule.example}</div>
-                  <div className="text-[11px] text-purple-300">{rule.emotionImpact}</div>
+                  <div className="text-[var(--text-primary)] font-tamil mb-0.5">{rule.example}</div>
+                  <div className="text-[11px] text-violet-400">{rule.emotionImpact}</div>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Right Column: Evolving Slang Dictionary Table (7 cols) */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-4">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <div className="flex items-center space-x-2">
-                <Database className="w-5 h-5 text-cyan-400" />
-                <h3 className="text-base font-bold text-white">Active Tamil Slang & Idiom Lexicon</h3>
-              </div>
-              <span className="text-xs text-slate-400 font-mono">
-                {lexiconList.length} Custom Entries
-              </span>
-            </div>
+        {/* RIGHT: Lexicon table */}
+        <div className="lg:col-span-3 card overflow-hidden">
+          <div className="px-5 pt-4 pb-3 border-b border-[var(--border-subtle)] flex items-center gap-2">
+            <Database className="w-4 h-4 text-teal-400" />
+            <h3 className="text-sm font-bold text-[var(--text-primary)]">Active Slang Lexicon</h3>
+            <span className="chip chip-slate text-[10px] ml-auto">{lexiconList.length} custom entries</span>
+          </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
-                    <th className="py-2.5 px-3">Slang Term / Expression</th>
-                    <th className="py-2.5 px-3">Category</th>
-                    <th className="py-2.5 px-3">Polarity</th>
-                    <th className="py-2.5 px-3">Meaning / Context</th>
-                    <th className="py-2.5 px-3">Retention</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-800/60 font-sans">
-                  {lexiconList.map((item, idx) => (
-                    <tr key={idx} className="hover:bg-slate-900/60 transition-colors">
-                      <td className="py-2.5 px-3 font-bold text-purple-300 font-tamil text-sm">
-                        {item.term}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <span className="px-2 py-0.5 rounded text-[10px] bg-slate-900 text-slate-300 border border-slate-700 font-mono">
-                          {item.category}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3 font-medium text-slate-200">
+          <div className="overflow-x-auto">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Term</th>
+                  <th>Category</th>
+                  <th>Polarity</th>
+                  <th>Meaning</th>
+                  <th className="text-right">Retention</th>
+                </tr>
+              </thead>
+              <tbody>
+                {lexiconList.map((item, idx) => (
+                  <tr key={idx} className="group">
+                    <td className="font-bold text-violet-400 font-tamil text-sm">{item.term}</td>
+                    <td>
+                      <span className="chip chip-slate text-[10px] font-mono">{item.category}</span>
+                    </td>
+                    <td>
+                      <span className={`chip text-[10px] ${POLARITY_COLORS[item.sentiment] || 'chip-slate'}`}>
                         {item.sentiment}
-                      </td>
-                      <td className="py-2.5 px-3 text-slate-300 text-[11px]">
-                        {item.meaning}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <span className="text-emerald-400 font-mono font-bold">
+                      </span>
+                    </td>
+                    <td className="text-[11px] text-[var(--text-secondary)] max-w-[160px] truncate">
+                      {item.meaning}
+                    </td>
+                    <td className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <span className="text-emerald-400 font-mono font-bold text-xs">
                           {(item.memoryWeight * 100).toFixed(0)}%
                         </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        <button
+                          onClick={() => handleRemove(idx)}
+                          className="opacity-0 group-hover:opacity-100 text-[var(--text-muted)] hover:text-red-400 transition-all"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

@@ -1,210 +1,283 @@
 import React, { useState } from 'react';
 import { TAMIL_SAMPLE_FEEDBACK, EMOTION_TYPES } from '../data/tamilDataset';
-import { 
-  BarChart3, 
-  Search, 
-  Filter, 
-  AlertTriangle, 
-  CheckCircle2, 
-  Zap, 
-  ArrowUpRight, 
-  TrendingUp, 
-  MessageSquare, 
-  Users, 
-  ShieldAlert, 
-  Flame,
-  Download
+import {
+  ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend
+} from 'recharts';
+import {
+  BarChart3, Search, Zap, AlertTriangle, CheckCircle2,
+  TrendingUp, MessageSquare, Users, ShieldAlert, Flame, Download, Filter
 } from 'lucide-react';
 
+function StatCard({ icon: Icon, label, value, delta, color = 'text-[var(--text-primary)]', accent = 'text-teal-400' }) {
+  return (
+    <div className="stat-card">
+      <div className="flex items-center justify-between mb-2">
+        <span className="stat-label">{label}</span>
+        <Icon className={`w-4 h-4 ${accent}`} />
+      </div>
+      <div className={`stat-value ${color}`}>{value}</div>
+      {delta && (
+        <div className={`stat-delta mt-2 ${delta.positive ? 'text-emerald-400' : 'text-red-400'}`}>
+          <TrendingUp className="w-3 h-3" />
+          {delta.text}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const URGENCY_COLORS = { CRITICAL: '#f87171', HIGH: '#fbbf24', NORMAL: '#34d399' };
+
 export default function BatchAnalytics() {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedChannel, setSelectedChannel] = useState('ALL');
+  const [searchQuery,       setSearchQuery]       = useState('');
+  const [selectedChannel,   setSelectedChannel]   = useState('ALL');
   const [filterSarcasmOnly, setFilterSarcasmOnly] = useState(false);
 
-  const filteredSamples = TAMIL_SAMPLE_FEEDBACK.filter(item => {
-    const matchesSearch = item.text.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.brand.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          item.actualEmotion.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesChannel = selectedChannel === 'ALL' || item.channel.includes(selectedChannel);
-    const matchesSarcasm = !filterSarcasmOnly || item.sarcasmDetected;
-    return matchesSearch && matchesChannel && matchesSarcasm;
+  const filtered = TAMIL_SAMPLE_FEEDBACK.filter(item => {
+    const q = searchQuery.toLowerCase();
+    const matchSearch  = !q || item.text.toLowerCase().includes(q) ||
+                         item.brand.toLowerCase().includes(q) ||
+                         item.actualEmotion.toLowerCase().includes(q);
+    const matchChannel = selectedChannel === 'ALL' || item.channel.includes(selectedChannel);
+    const matchSarcasm = !filterSarcasmOnly || item.sarcasmDetected;
+    return matchSearch && matchChannel && matchSarcasm;
   });
 
+  /* Pie data — emotion distribution across all samples */
+  const emotionCounts = {};
+  TAMIL_SAMPLE_FEEDBACK.forEach(s => {
+    const e = s.actualEmotion;
+    emotionCounts[e] = (emotionCounts[e] || 0) + 1;
+  });
+  const pieData = Object.entries(emotionCounts).map(([name, value]) => ({
+    name,
+    value,
+    color: (EMOTION_TYPES.find(t => t.key === name.toLowerCase() || t.label === name) || {}).color || '#64748b',
+  }));
+
   return (
-    <div className="space-y-8">
-      {/* Top Metrics Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Customer Feedback</span>
-            <MessageSquare className="w-5 h-5 text-teal-400" />
+    <div className="space-y-5">
+
+      {/* ── Page header ─────────────────────────────────── */}
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <BarChart3 className="w-5 h-5 text-teal-400" />
+          <h1 className="text-xl font-extrabold text-[var(--text-primary)]">Batch Analytics</h1>
+        </div>
+        <p className="text-sm text-[var(--text-secondary)]">
+          Multi-channel Tamil customer feedback — live ingestion from Zomato, Swiggy, Amazon, YouTube, Telecom.
+        </p>
+      </div>
+
+      {/* ── KPI row ─────────────────────────────────────── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          icon={MessageSquare} label="Total Feedback" value="1,428"
+          delta={{ positive: true, text: '+14.2% today' }} accent="text-teal-400"
+        />
+        <StatCard
+          icon={Zap} label="Sarcasm Flagged" value="312"
+          color="text-pink-400" accent="text-pink-400"
+          delta={{ positive: false, text: '21.8% misread by baseline' }}
+        />
+        <StatCard
+          icon={ShieldAlert} label="Escalations Saved" value="89 Critical"
+          color="text-amber-400" accent="text-amber-400"
+          delta={{ positive: true, text: 'Prevented churn' }}
+        />
+        <StatCard
+          icon={Flame} label="Accuracy Gain" value="+18.0%"
+          color="text-violet-400" accent="text-violet-400"
+          delta={{ positive: true, text: 'Over mBERT baseline' }}
+        />
+      </div>
+
+      {/* ── Chart + Filter row ───────────────────────────── */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+
+        {/* Emotion distribution pie */}
+        <div className="card p-5">
+          <div className="flex items-center gap-2 mb-4 pb-3 border-b border-[var(--border-subtle)]">
+            <Flame className="w-4 h-4 text-violet-400" />
+            <h3 className="text-sm font-bold text-[var(--text-primary)]">Emotion Distribution</h3>
           </div>
-          <div className="text-2xl font-extrabold text-white">1,428 Feedback</div>
-          <div className="flex items-center text-xs text-emerald-400 space-x-1">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>+14.2% Tamil text traffic today</span>
+          <div className="h-52">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData} cx="50%" cy="50%"
+                  innerRadius={55} outerRadius={85}
+                  paddingAngle={3} dataKey="value"
+                >
+                  {pieData.map((entry, i) => (
+                    <Cell key={i} fill={entry.color} stroke="transparent" />
+                  ))}
+                </Pie>
+                <Tooltip
+                  contentStyle={{
+                    background: 'var(--bg-elevated)',
+                    border: '1px solid var(--border-default)',
+                    borderRadius: 10, fontSize: 12,
+                    color: 'var(--text-primary)'
+                  }}
+                  formatter={v => [v, 'cases']}
+                />
+                <Legend
+                  iconType="circle" iconSize={8}
+                  formatter={(v) => <span style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{v}</span>}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Sarcasm & Implicit Alert</span>
-            <Zap className="w-5 h-5 text-pink-400" />
+        {/* Search + Filters */}
+        <div className="lg:col-span-2 card p-5">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--border-subtle)]">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-teal-400" />
+              <h3 className="text-sm font-bold text-[var(--text-primary)]">Filters</h3>
+              <span className="chip chip-slate text-[10px]">{filtered.length} results</span>
+            </div>
+            <button
+              onClick={() => alert('Exporting…')}
+              className="btn-secondary text-[11px] py-1.5"
+            >
+              <Download className="w-3.5 h-3.5" /> Export CSV
+            </button>
           </div>
-          <div className="text-2xl font-extrabold text-pink-400">312 Flagged</div>
-          <div className="text-xs text-slate-400">
-            <span className="text-pink-300 font-bold">21.8%</span> Sarcastic praise misread by baseline
-          </div>
-        </div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Escalation Saved</span>
-            <ShieldAlert className="w-5 h-5 text-amber-400" />
-          </div>
-          <div className="text-2xl font-extrabold text-amber-400">89 Critical Cases</div>
-          <div className="text-xs text-slate-400">
-            Prevented churn on order delays & cancellation
-          </div>
-        </div>
+          <div className="space-y-3">
+            {/* Search */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 text-[var(--text-muted)] absolute left-3 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search text, brand or emotion…"
+                className="input-field pl-9 text-[12px]"
+              />
+            </div>
 
-        <div className="glass-panel p-5 rounded-2xl border border-slate-800 space-y-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Model Accuracy Advantage</span>
-            <Flame className="w-5 h-5 text-violet-400" />
-          </div>
-          <div className="text-2xl font-extrabold text-violet-400">+18.0% Over mBERT</div>
-          <div className="text-xs text-violet-300">
-            Morphology-Aware Morpho-Syntactic Adapter
+            {/* Channel + Sarcasm filter */}
+            <div className="flex flex-wrap gap-3 items-center">
+              <select
+                value={selectedChannel}
+                onChange={e => setSelectedChannel(e.target.value)}
+                className="select-field w-auto flex-1 min-w-[160px]"
+              >
+                <option value="ALL">All Channels</option>
+                <option value="Food Delivery">Food Delivery</option>
+                <option value="E-Commerce">E-Commerce</option>
+                <option value="Telecom">Telecom</option>
+                <option value="FinTech">FinTech</option>
+              </select>
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={filterSarcasmOnly}
+                  onChange={e => setFilterSarcasmOnly(e.target.checked)}
+                  className="rounded bg-[var(--bg-base)] border-[var(--border-default)] accent-teal-500"
+                />
+                <span className="text-xs font-semibold text-pink-400">Sarcasm Only</span>
+              </label>
+            </div>
+
+            {/* Urgency quick filter badges */}
+            <div className="flex gap-2 flex-wrap pt-1">
+              {['CRITICAL','HIGH','NORMAL'].map(u => {
+                const count = TAMIL_SAMPLE_FEEDBACK.filter(s => s.urgency === u).length;
+                return (
+                  <button
+                    key={u}
+                    onClick={() => setSearchQuery(u.toLowerCase())}
+                    className={`chip text-[10px] cursor-pointer transition-opacity hover:opacity-80 ${
+                      u === 'CRITICAL' ? 'chip-red' : u === 'HIGH' ? 'chip-amber' : 'chip-green'
+                    }`}
+                  >
+                    {u} · {count}
+                  </button>
+                );
+              })}
+              <button
+                onClick={() => { setSearchQuery(''); setSelectedChannel('ALL'); setFilterSarcasmOnly(false); }}
+                className="chip chip-slate text-[10px] cursor-pointer hover:opacity-80"
+              >
+                Clear filters
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Filter & Table Card */}
-      <div className="glass-panel rounded-2xl p-6 border border-slate-800 space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
-          <div>
-            <h2 className="text-xl font-extrabold text-white flex items-center space-x-2">
-              <BarChart3 className="w-5 h-5 text-teal-400" />
-              <span>Multi-Channel Tamil Customer Intelligence Stream</span>
-            </h2>
-            <p className="text-xs text-slate-400 mt-1">
-              Live feedback ingested from Zomato, Swiggy, Amazon, YouTube, and Telecom Support chats.
-            </p>
-          </div>
-
-          {/* Action Export Button */}
-          <button 
-            onClick={() => alert("Exporting Tamil Emotion Dataset (CSV)...")}
-            className="flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-slate-900 border border-slate-700 hover:border-teal-500 text-slate-200 transition-all"
-          >
-            <Download className="w-4 h-4 text-teal-400" />
-            <span>Export Flagged Log (CSV)</span>
-          </button>
+      {/* ── Feedback records ─────────────────────────────── */}
+      <div className="card overflow-hidden">
+        <div className="px-5 pt-4 pb-3 border-b border-[var(--border-subtle)] flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-teal-400" />
+          <h3 className="text-sm font-bold text-[var(--text-primary)]">Feedback Records</h3>
+          <span className="chip chip-slate text-[10px] ml-auto">{filtered.length} entries</span>
         </div>
 
-        {/* Search & Filter Toolbar */}
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3">
-          <div className="sm:col-span-6 relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search Tamil text, brand, or emotion..."
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2 text-xs text-slate-100 focus:outline-none focus:border-teal-500"
-            />
+        {filtered.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <Search className="w-8 h-8 text-[var(--text-muted)] mb-3" />
+            <p className="text-sm font-semibold text-[var(--text-secondary)]">No results found</p>
+            <p className="text-xs text-[var(--text-muted)]">Try adjusting your search or filters</p>
           </div>
+        ) : (
+          <div className="divide-y divide-[var(--border-subtle)]">
+            {filtered.map(item => (
+              <div key={item.id} className="px-5 py-4 hover:bg-[var(--bg-elevated)] transition-colors">
 
-          <div className="sm:col-span-3">
-            <select
-              value={selectedChannel}
-              onChange={(e) => setSelectedChannel(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-teal-500"
-            >
-              <option value="ALL">All Channels</option>
-              <option value="Food Delivery">Food Delivery (Zomato/Swiggy)</option>
-              <option value="E-Commerce">E-Commerce (Amazon)</option>
-              <option value="Telecom">Telecom (Airtel/Jio)</option>
-              <option value="FinTech">FinTech / App Store</option>
-            </select>
-          </div>
-
-          <div className="sm:col-span-3 flex items-center">
-            <label className="flex items-center space-x-2 text-xs text-slate-300 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={filterSarcasmOnly}
-                onChange={(e) => setFilterSarcasmOnly(e.target.checked)}
-                className="rounded bg-slate-900 border-slate-700 text-cyan-500 focus:ring-cyan-500"
-              />
-              <span className="font-semibold text-pink-400">Filter Sarcasm Only</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Feedback Records Table */}
-        <div className="space-y-4">
-          {filteredSamples.map((item) => (
-            <div 
-              key={item.id}
-              className="glass-card rounded-xl p-5 border border-slate-800 hover:border-slate-700 transition-all space-y-3"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/60 pb-2.5">
-                <div className="flex items-center space-x-2">
-                  <span className="px-2.5 py-0.5 rounded text-[11px] font-bold bg-slate-900 text-cyan-300 border border-cyan-800/40">
-                    {item.brand}
-                  </span>
-                  <span className="text-xs text-slate-400 font-mono">• {item.channel}</span>
+                {/* Row header */}
+                <div className="flex flex-wrap items-center gap-2 mb-2.5">
+                  <span className="chip chip-teal text-[10px] font-bold">{item.brand}</span>
+                  <span className="text-[11px] text-[var(--text-muted)]">{item.channel}</span>
+                  <div className="ml-auto flex items-center gap-2">
+                    {item.sarcasmDetected && (
+                      <span className="chip chip-pink text-[10px]">
+                        <Zap className="w-3 h-3" /> Sarcasm
+                      </span>
+                    )}
+                    <span className={`chip text-[10px] ${
+                      item.urgency === 'CRITICAL' ? 'chip-red' :
+                      item.urgency === 'HIGH' ? 'chip-amber' : 'chip-green'
+                    }`}>{item.urgency}</span>
+                  </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  {item.sarcasmDetected && (
-                    <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-pink-950 text-pink-300 border border-pink-700/50">
-                      <Zap className="w-3 h-3 mr-1 text-pink-400" /> Sarcastic Flip
-                    </span>
-                  )}
-                  <span className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase ${
-                    item.urgency === 'CRITICAL' ? 'bg-red-950 text-red-300 border border-red-800' :
-                    item.urgency === 'HIGH' ? 'bg-amber-950 text-amber-300 border border-amber-800' :
-                    'bg-emerald-950 text-emerald-300 border border-emerald-800'
-                  }`}>
-                    {item.urgency} Urgency
-                  </span>
-                </div>
-              </div>
-
-              {/* Text Snippet */}
-              <div className="space-y-1">
-                <p className="text-sm font-tamil text-slate-100 font-medium leading-relaxed">
+                {/* Tamil text */}
+                <p className="text-sm font-tamil text-[var(--text-primary)] leading-relaxed mb-1">
                   "{item.text}"
                 </p>
-                <p className="text-xs text-slate-400 italic">
-                  Transliteration: {item.transliteration}
-                </p>
-              </div>
+                <p className="text-[11px] text-[var(--text-muted)] italic mb-3">{item.transliteration}</p>
 
-              {/* Baseline vs Our Model Comparison Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 text-xs">
-                <div className="bg-slate-950 p-2.5 rounded-lg border border-slate-800 flex items-start space-x-2">
-                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="text-[10px] text-slate-400 uppercase font-semibold block">Baseline Model Mistake:</span>
-                    <span className="text-red-300 font-medium">{item.baselineResult.predictedEmotion}</span>
+                {/* Baseline vs Ours */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  <div className="bg-red-500/5 border border-red-500/15 rounded-lg p-2.5 flex items-start gap-2">
+                    <AlertTriangle className="w-3.5 h-3.5 text-red-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="text-[9px] font-bold text-red-400 uppercase mb-0.5">Baseline Fail</div>
+                      <div className="text-xs font-semibold text-[var(--text-secondary)]">
+                        {item.baselineResult.predictedEmotion}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="bg-teal-500/5 border border-teal-500/15 rounded-lg p-2.5 flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-teal-400 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <div className="text-[9px] font-bold text-teal-400 uppercase mb-0.5">Our Model ({item.confidence}%)</div>
+                      <div className="text-xs font-semibold text-[var(--text-secondary)]">
+                        {item.ourModelResult.predictedEmotion}
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                <div className="bg-slate-950 p-2.5 rounded-lg border border-cyan-900/50 flex items-start space-x-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                  <div>
-                    <span className="text-[10px] text-cyan-400 uppercase font-semibold block">Our AI Reasoning ({item.confidence}%):</span>
-                    <span className="text-emerald-300 font-medium">{item.ourModelResult.predictedEmotion}</span>
-                  </div>
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
