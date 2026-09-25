@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { TAMIL_SAMPLE_FEEDBACK, EMOTION_TYPES } from '../data/tamilDataset';
+import { useApp } from '../context/AppContext';
 import {
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip, Legend
 } from 'recharts';
 import {
   BarChart3, Search, Zap, AlertTriangle, CheckCircle2,
-  TrendingUp, MessageSquare, Users, ShieldAlert, Flame, Download, Filter
+  TrendingUp, MessageSquare, ShieldAlert, Flame, Download, Filter,
+  Clock, BrainCircuit, ArrowRight
 } from 'lucide-react';
 
 function StatCard({ icon: Icon, label, value, delta, color = 'text-[var(--text-primary)]', accent = 'text-teal-400' }) {
@@ -29,9 +31,11 @@ function StatCard({ icon: Icon, label, value, delta, color = 'text-[var(--text-p
 const URGENCY_COLORS = { CRITICAL: '#f87171', HIGH: '#fbbf24', NORMAL: '#34d399' };
 
 export default function BatchAnalytics() {
+  const { analysisHistory, navigateTo } = useApp();
   const [searchQuery,       setSearchQuery]       = useState('');
   const [selectedChannel,   setSelectedChannel]   = useState('ALL');
   const [filterSarcasmOnly, setFilterSarcasmOnly] = useState(false);
+  const [showSession,       setShowSession]       = useState(true);
 
   const filtered = TAMIL_SAMPLE_FEEDBACK.filter(item => {
     const q = searchQuery.toLowerCase();
@@ -68,6 +72,57 @@ export default function BatchAnalytics() {
           Multi-channel Tamil customer feedback — live ingestion from Zomato, Swiggy, Amazon, YouTube, Telecom.
         </p>
       </div>
+
+      {/* ── Live Session Results ─────────────────────────── */}
+      {analysisHistory.length > 0 && (
+        <div className="card overflow-hidden border border-teal-500/20">
+          <div className="px-5 py-3 border-b border-[var(--border-subtle)] flex items-center gap-2 bg-teal-500/5">
+            <div className="w-2 h-2 rounded-full bg-teal-400 animate-pulse flex-shrink-0" />
+            <BrainCircuit className="w-4 h-4 text-teal-400" />
+            <span className="text-sm font-bold text-teal-400">
+              Live Session — {analysisHistory.length} {analysisHistory.length === 1 ? 'analysis' : 'analyses'} from Sandbox
+            </span>
+            <button
+              onClick={() => setShowSession(v => !v)}
+              className="ml-auto text-[11px] text-[var(--text-muted)] hover:text-[var(--text-primary)] transition-colors"
+            >
+              {showSession ? 'Collapse ↑' : 'Expand ↓'}
+            </button>
+            <button
+              onClick={() => navigateTo('sandbox')}
+              className="flex items-center gap-1 chip chip-teal text-[10px]"
+            >
+              <ArrowRight className="w-3 h-3" /> Go to Sandbox
+            </button>
+          </div>
+          {showSession && (
+            <div className="divide-y divide-[var(--border-subtle)] max-h-72 overflow-y-auto">
+              {analysisHistory.map(entry => (
+                <div key={entry.id} className="px-5 py-3 flex flex-wrap items-center gap-3 hover:bg-[var(--bg-elevated)] transition-colors">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-tamil text-[var(--text-primary)] truncate">"{entry.inputText}"</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="font-bold text-xs text-teal-400">{entry.emotion}</span>
+                      <span className="text-[10px] text-[var(--text-muted)]">· {entry.confidence}% confidence</span>
+                      {entry.isCustom && <span className="chip chip-amber text-[9px]">Custom</span>}
+                      {entry.lexiconHit && <span className="chip chip-violet text-[9px]">Lexicon Hit</span>}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className={`chip text-[10px] ${entry.urgency === 'CRITICAL' ? 'chip-red' : entry.urgency === 'HIGH' ? 'chip-amber' : 'chip-green'}`}>
+                      {entry.urgency}
+                    </span>
+                    <span className="text-[10px] text-[var(--text-muted)] font-mono flex items-center gap-0.5">
+                      <Clock className="w-2.5 h-2.5" />
+                      {new Date(entry.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── KPI row ─────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

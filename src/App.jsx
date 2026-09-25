@@ -3,6 +3,7 @@ import {
   BrainCircuit, BarChart3, Layers, BookOpen,
   Activity, Sparkles, ArrowUp, Menu, X
 } from 'lucide-react';
+import { AppProvider } from './context/AppContext';
 
 const ReasoningSandbox        = lazy(() => import('./components/ReasoningSandbox'));
 const BatchAnalytics          = lazy(() => import('./components/BatchAnalytics'));
@@ -107,6 +108,7 @@ export default function App() {
   const current = NAV_ITEMS.find(n => n.id === active);
 
   return (
+    <AppProvider navigateTo={handleTabChange}>
     <div className="app-shell">
 
       {/* ── Topbar ─────────────────────────────────────── */}
@@ -272,5 +274,6 @@ export default function App() {
         </button>
       )}
     </div>
+    </AppProvider>
   );
 }
