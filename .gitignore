@@ -27,3 +27,8 @@ dist-ssr/
 # PDF & Scratch files
 project-zeroth.pdf
 scratch_pdf_text.txt
+
+# Maven build outputs
+target/
+backend/target/
+*.class

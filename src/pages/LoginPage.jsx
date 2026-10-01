@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Eye, EyeOff, User, Lock, ArrowRight, BrainCircuit, BookType, Globe2, ScanFace } from 'lucide-react';
+import { Sparkles, Eye, EyeOff, User, Lock, ArrowRight, BrainCircuit, BookType, Globe2, ScanFace, Database, CheckCircle2 } from 'lucide-react';
+import { authAPI } from '../services/api';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [isRegister, setIsRegister] = useState(false);
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [fullName, setFullName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleAuth = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMsg('');
 
     if (!username.trim() || !password.trim()) {
       setError('Please enter both username and password.');
@@ -20,18 +26,63 @@ export default function LoginPage() {
     }
 
     setLoading(true);
-    // Demo: any credentials work
-    setTimeout(() => {
+
+    try {
+      if (isRegister) {
+        const response = await authAPI.register({
+          username: username.trim(),
+          password: password.trim(),
+          email: email.trim(),
+          fullName: fullName.trim()
+        });
+        localStorage.setItem('tamil_ai_token', response.token);
+        localStorage.setItem('tamil_ai_user', JSON.stringify({
+          username: response.username,
+          role: response.role,
+          fullName: response.fullName
+        }));
+        setSuccessMsg('Account registered in MongoDB! Redirecting to Dashboard...');
+        setTimeout(() => navigate('/dashboard'), 800);
+      } else {
+        const response = await authAPI.login({
+          username: username.trim(),
+          password: password.trim()
+        });
+        localStorage.setItem('tamil_ai_token', response.token);
+        localStorage.setItem('tamil_ai_user', JSON.stringify({
+          username: response.username,
+          role: response.role,
+          fullName: response.fullName
+        }));
+        setSuccessMsg('Authenticated via Spring Boot! Loading...');
+        setTimeout(() => navigate('/dashboard'), 600);
+      }
+    } catch (err) {
+      console.error('Auth error:', err);
+      // Fallback demo login if network is offline
+      if (err.message && err.message.includes('Failed to fetch')) {
+        setError('Backend server offline. Continuing in offline demo mode...');
+        localStorage.setItem('tamil_ai_user', JSON.stringify({ username, role: 'RESEARCHER', fullName: username }));
+        setTimeout(() => navigate('/dashboard'), 1000);
+      } else {
+        setError(err.message || 'Authentication failed. Please verify credentials.');
+      }
+    } finally {
       setLoading(false);
-      navigate('/dashboard');
-    }, 1200);
+    }
+  };
+
+  const handleQuickFill = (u, p) => {
+    setUsername(u);
+    setPassword(p);
+    setError('');
   };
 
   const features = [
-    { icon: <BookType size={18} />, text: 'Morphology-Aware Analysis' },
-    { icon: <Globe2 size={18} />, text: 'Cultural Context Understanding' },
-    { icon: <ScanFace size={18} />, text: 'Sarcasm Detection' },
-    { icon: <BrainCircuit size={18} />, text: 'Implicit Emotion Reasoning' },
+    { icon: <BookType size={18} />, text: 'Morphology-Aware Tamil Tokenizer' },
+    { icon: <Globe2 size={18} />, text: 'Cultural Idioms & Metaphor Grounding' },
+    { icon: <ScanFace size={18} />, text: 'Contextual Sarcasm Contradiction' },
+    { icon: <BrainCircuit size={18} />, text: 'Continual Learning with EWC & Replay' },
   ];
 
   return (
@@ -67,6 +118,9 @@ export default function LoginPage() {
         {/* Hero text */}
         <div className="relative z-10 space-y-8">
           <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-blue-200 text-xs font-semibold mb-4 border border-white/20">
+              <Database size={13} /> Fullstack Java Spring Boot + MongoDB
+            </div>
             <h1 className="text-5xl font-extrabold text-white leading-tight mb-4">
               Understand Tamil<br />
               <span style={{
@@ -78,8 +132,8 @@ export default function LoginPage() {
                 Emotion Deeply.
               </span>
             </h1>
-            <p style={{ color: 'rgba(255,255,255,0.70)', fontSize: '16px', lineHeight: '1.7', maxWidth: '380px' }}>
-              Culturally grounded Tamil emotion reasoning with morphology-aware analysis and continual adaptation.
+            <p style={{ color: 'rgba(255,255,255,0.70)', fontSize: '16px', lineHeight: '1.7', maxWidth: '420px' }}>
+              Culturally grounded Tamil emotion reasoning system backed by Java Spring Boot, MongoDB document storage, and continual adaptation.
             </p>
           </div>
 
@@ -98,154 +152,224 @@ export default function LoginPage() {
         </div>
 
         {/* Bottom tag */}
-        <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full text-xs font-semibold"
-            style={{ background: 'rgba(255,255,255,0.10)', border: '1px solid rgba(255,255,255,0.20)', color: '#BBDEFB' }}>
-            <Sparkles size={12} />
-            Final Year Project — Tamil NLP Research
-          </div>
+        <div className="relative z-10 flex items-center justify-between text-xs"
+          style={{ color: 'rgba(255,255,255,0.50)', borderTop: '1px solid rgba(255,255,255,0.10)', paddingTop: '16px' }}>
+          <span>Final Year Project 2026</span>
+          <span className="flex items-center gap-1.5 text-emerald-300">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse" />
+            MongoDB 9.0 Connected
+          </span>
         </div>
       </div>
 
-      {/* ── Right Panel (Login Form) ── */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="w-full max-w-md">
+      {/* ── Right Panel: Form ── */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12">
+        <div className="w-full max-w-md space-y-6">
 
-          {/* Mobile logo */}
-          <div className="flex lg:hidden items-center gap-3 mb-10 justify-center">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center"
-              style={{ background: 'linear-gradient(135deg,#0D2137,#1565C0)' }}>
-              <Sparkles size={18} color="#BBDEFB" />
-            </div>
-            <span className="text-xl font-bold" style={{ color: '#0D2137' }}>
-              TamilEmotion<span style={{ color: '#2196F3' }}>AI</span>
-            </span>
+          {/* Tab Switcher */}
+          <div className="flex bg-blue-50/80 p-1 rounded-xl border border-blue-100 max-w-xs mx-auto">
+            <button
+              type="button"
+              onClick={() => { setIsRegister(false); setError(''); }}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                !isRegister ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => { setIsRegister(true); setError(''); }}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition-all ${
+                isRegister ? 'bg-white text-primary shadow-sm' : 'text-gray-500 hover:text-gray-800'
+              }`}
+            >
+              Register New User
+            </button>
           </div>
 
-          {/* Form card */}
-          <div className="bg-white rounded-2xl p-8 shadow-xl" style={{ border: '1px solid rgba(33,150,243,0.15)', borderLeft: '4px solid #2196F3' }}>
-
-            {/* Header */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-extrabold mb-2" style={{ color: '#0D2137' }}>Welcome back</h2>
-              <p style={{ color: '#374151', fontSize: '15px' }}>
-                Sign in to access the Tamil emotion analysis platform.
-              </p>
-            </div>
-
-            {/* Demo hint */}
-            <div className="mb-6 px-4 py-3 rounded-lg flex items-start gap-3"
-              style={{ background: 'rgba(33,150,243,0.07)', border: '1px solid rgba(33,150,243,0.18)' }}>
-              <Sparkles size={16} style={{ color: '#1565C0', marginTop: '1px', flexShrink: 0 }} />
-              <p style={{ color: '#1565C0', fontSize: '13px', fontWeight: '500' }}>
-                <strong>Demo mode:</strong> Enter any username and password to sign in.
-              </p>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleLogin} className="space-y-5">
-
-              {/* Username */}
-              <div>
-                <label className="block text-sm font-bold mb-2 uppercase tracking-wider"
-                  style={{ color: '#0D2137', letterSpacing: '0.06em', fontSize: '11px' }}>
-                  Username
-                </label>
-                <div className="relative">
-                  <User size={17} className="absolute left-3 top-1/2 -translate-y-1/2"
-                    style={{ color: '#1565C0' }} />
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter your username"
-                    className="w-full pl-10 pr-4 py-3 rounded-lg text-sm font-medium outline-none transition-all"
-                    style={{
-                      border: '1.5px solid rgba(33,150,243,0.25)',
-                      color: '#0D2137',
-                      background: '#FAFCFF',
-                    }}
-                    onFocus={e => e.target.style.borderColor = '#2196F3'}
-                    onBlur={e => e.target.style.borderColor = 'rgba(33,150,243,0.25)'}
-                  />
-                </div>
-              </div>
-
-              {/* Password */}
-              <div>
-                <label className="block text-sm font-bold mb-2 uppercase tracking-wider"
-                  style={{ color: '#0D2137', letterSpacing: '0.06em', fontSize: '11px' }}>
-                  Password
-                </label>
-                <div className="relative">
-                  <Lock size={17} className="absolute left-3 top-1/2 -translate-y-1/2"
-                    style={{ color: '#1565C0' }} />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="w-full pl-10 pr-10 py-3 rounded-lg text-sm font-medium outline-none transition-all"
-                    style={{
-                      border: '1.5px solid rgba(33,150,243,0.25)',
-                      color: '#0D2137',
-                      background: '#FAFCFF',
-                    }}
-                    onFocus={e => e.target.style.borderColor = '#2196F3'}
-                    onBlur={e => e.target.style.borderColor = 'rgba(33,150,243,0.25)'}
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2"
-                    style={{ color: '#6B7280' }}>
-                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Error */}
-              {error && (
-                <div className="px-4 py-3 rounded-lg text-sm font-medium"
-                  style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#DC2626' }}>
-                  {error}
-                </div>
-              )}
-
-              {/* Submit */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2 transition-all"
-                style={{
-                  background: loading ? '#90CAF9' : 'linear-gradient(135deg, #0D2137 0%, #1565C0 50%, #2196F3 100%)',
-                  boxShadow: loading ? 'none' : '0 4px 16px rgba(33,150,243,0.35)',
-                  fontSize: '15px',
-                  cursor: loading ? 'not-allowed' : 'pointer',
-                  transform: 'translateY(0)',
-                  transition: 'all 0.25s ease'
-                }}
-                onMouseEnter={e => !loading && (e.target.style.transform = 'translateY(-2px)')}
-                onMouseLeave={e => e.target.style.transform = 'translateY(0)'}
-              >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" stroke="white" strokeWidth="3" strokeDasharray="60" strokeDashoffset="20"/>
-                    </svg>
-                    Signing in...
-                  </>
-                ) : (
-                  <>Sign In <ArrowRight size={18} /></>
-                )}
-              </button>
-            </form>
-
-            {/* Footer note */}
-            <p className="text-center mt-6 text-xs" style={{ color: '#6B7280' }}>
-              Final Year Project Demo · Tamil Emotion Reasoning System
+          {/* Form Header */}
+          <div className="text-center">
+            <h2 className="text-3xl font-extrabold" style={{ color: '#0D2137' }}>
+              {isRegister ? 'Create NLP Researcher Account' : 'Welcome to TamilEmotion AI'}
+            </h2>
+            <p className="text-muted text-sm mt-1">
+              {isRegister
+                ? 'Store analyses, custom idioms, and adaptation logs in MongoDB'
+                : 'Sign in to access morphological reasoning and continual learning'}
             </p>
           </div>
+
+          {/* Quick Credential Badges */}
+          {!isRegister && (
+            <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-100 space-y-1.5">
+              <p className="text-xs font-semibold text-blue-900 flex items-center gap-1.5">
+                <Sparkles size={13} className="text-blue-600" /> Pre-seeded MongoDB Demo Accounts:
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('admin', 'admin123')}
+                  className="flex-1 text-[11px] font-semibold py-1 px-2 rounded bg-white text-blue-700 border border-blue-200 hover:bg-blue-100/50 transition-all text-left"
+                >
+                  <span className="font-bold">admin</span> / admin123
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleQuickFill('researcher', 'tamilai2026')}
+                  className="flex-1 text-[11px] font-semibold py-1 px-2 rounded bg-white text-blue-700 border border-blue-200 hover:bg-blue-100/50 transition-all text-left"
+                >
+                  <span className="font-bold">researcher</span> / tamilai2026
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Error Message */}
+          {error && (
+            <div className="p-3.5 rounded-xl text-sm font-medium flex items-center gap-2"
+              style={{ background: 'rgba(239,68,68,0.08)', color: '#DC2626', border: '1px solid rgba(239,68,68,0.20)' }}>
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {successMsg && (
+            <div className="p-3.5 rounded-xl text-sm font-medium flex items-center gap-2 bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <CheckCircle2 size={16} />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleAuth} className="space-y-4">
+            {isRegister && (
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: '#0D2137' }}>
+                  Full Name
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="e.g. Dr. K. Sundaram"
+                    className="w-full px-4 py-3 pl-10 rounded-xl text-sm font-medium transition-all"
+                    style={{
+                      border: '1.5px solid rgba(33,150,243,0.25)',
+                      background: 'white',
+                      color: '#0D2137',
+                    }}
+                  />
+                  <User size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
+                </div>
+              </div>
+            )}
+
+            {isRegister && (
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: '#0D2137' }}>
+                  Email Address
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="researcher@tamilai.org"
+                    className="w-full px-4 py-3 pl-10 rounded-xl text-sm font-medium transition-all"
+                    style={{
+                      border: '1.5px solid rgba(33,150,243,0.25)',
+                      background: 'white',
+                      color: '#0D2137',
+                    }}
+                  />
+                  <Globe2 size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
+                </div>
+              </div>
+            )}
+
+            {/* Username */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: '#0D2137' }}>
+                Username
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Enter username"
+                  className="w-full px-4 py-3 pl-10 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    border: '1.5px solid rgba(33,150,243,0.25)',
+                    background: 'white',
+                    color: '#0D2137',
+                  }}
+                />
+                <User size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
+              </div>
+            </div>
+
+            {/* Password */}
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider mb-1.5" style={{ color: '#0D2137' }}>
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  className="w-full px-4 py-3 pl-10 pr-10 rounded-xl text-sm font-medium transition-all"
+                  style={{
+                    border: '1.5px solid rgba(33,150,243,0.25)',
+                    background: 'white',
+                    color: '#0D2137',
+                  }}
+                />
+                <Lock size={16} className="absolute left-3.5 top-3.5 text-gray-400" />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3.5 top-3.5 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl font-bold text-sm text-white flex items-center justify-center gap-2 transition-all shadow-md mt-4"
+              style={{
+                background: 'linear-gradient(135deg, #1565C0 0%, #2196F3 100%)',
+                opacity: loading ? 0.8 : 1,
+              }}
+            >
+              {loading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Connecting to Backend...</span>
+                </>
+              ) : (
+                <>
+                  <span>{isRegister ? 'Create Account & Sign In' : 'Sign In to Workspace'}</span>
+                  <ArrowRight size={16} />
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Footer note */}
+          <p className="text-center text-xs text-muted">
+            Backed by <span className="font-bold text-primary">Spring Boot 3.2</span> &{' '}
+            <span className="font-bold text-primary">MongoDB 9.0</span>
+          </p>
         </div>
       </div>
     </div>

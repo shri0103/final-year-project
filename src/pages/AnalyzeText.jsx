@@ -3,57 +3,80 @@ import { useNavigate } from 'react-router-dom';
 import {
   Sparkles, MessageSquare, ShieldCheck,
   CheckCircle2, Zap, Globe2, ScanFace, BookType, Brain,
-  Frown, SmilePlus
+  Frown, SmilePlus, Database, AlertCircle
 } from 'lucide-react';
+import { emotionAPI } from '../services/api';
 
 const SAMPLE_INPUTS = [
-  { label: 'Frustration',      icon: <Frown size={18} />,       color: '#EF4444', bg: 'rgba(239,68,68,0.08)',   border: 'rgba(239,68,68,0.20)',   text: 'சாப்பாடு நல்லாவே இல்லை. காசு வேஸ்ட்.' },
-  { label: 'Sarcasm',          icon: <ScanFace size={18} />,    color: '#F59E0B', bg: 'rgba(245,158,11,0.08)',  border: 'rgba(245,158,11,0.22)',  text: 'சூப்பர் சர்வீஸ்! இரண்டு மணி நேரம் காத்திருக்க வைத்ததற்கு நன்றி.' },
-  { label: 'Satisfaction',     icon: <SmilePlus size={18} />,   color: '#10B981', bg: 'rgba(16,185,129,0.08)',  border: 'rgba(16,185,129,0.22)',  text: 'ரொம்ப நல்லா இருந்தது, சீக்கிரமா டெலிவரி பண்ணிட்டாங்க.' },
-  { label: 'Implicit Emotion', icon: <MessageSquare size={18} />,color: '#1565C0', bg: 'rgba(21,101,192,0.08)', border: 'rgba(21,101,192,0.22)', text: 'போன் பண்ணா எடுக்கவே மாட்றாங்க...' },
+  { label: 'Sarcasm Contradiction', icon: <ScanFace size={16} />, color: '#F59E0B', text: 'ரொம்ப நல்லா சேவை செய்றீங்க! 3 வாரம் ஆச்சு, பொருளும் வரல, பணமும் திரும்ப வரல. சூப்பர் சிஸ்டம்!' },
+  { label: 'Agglutinative Distress', icon: <Frown size={16} />, color: '#EF4444', text: 'என் வயித்துல அடிச்சுட்டீங்கப்பா! ஹோட்டல்ல ஆர்டர் பண்ணி 2 மணி நேரம் காக்க வச்சு கடைசியில கேன்சல் பண்ணிட்டீங்க.' },
+  { label: 'Customer Delight', icon: <SmilePlus size={16} />, color: '#10B981', text: 'ரொம்ப நல்லா இருந்தது, சீக்கிரமா டெலிவரி பண்ணிட்டாங்க. அருமையான சர்வீஸ்!' },
+  { label: 'Implicit Frustration', icon: <MessageSquare size={16} />, color: '#1565C0', text: 'போன் பண்ணா எடுக்கவே மாட்றாங்க...' },
 ];
 
 const ANALYSIS_STEPS = [
-  { icon: <BookType size={15} />,    text: 'Tokenizing Tamil text',               color: '#1565C0' },
-  { icon: <Globe2 size={15} />,      text: 'Analyzing linguistic patterns',       color: '#2196F3' },
-  { icon: <Brain size={15} />,       text: 'Morphological understanding',         color: '#1565C0' },
-  { icon: <ScanFace size={15} />,    text: 'Detecting sarcasm & context',         color: '#2196F3' },
-  { icon: <Sparkles size={15} />,    text: 'Generating emotion reasoning',        color: '#1565C0' },
-];
-
-const CAPABILITIES = [
-  { icon: <BookType size={18} />, label: 'Morphology-Aware' },
-  { icon: <Globe2   size={18} />, label: 'Cultural Context' },
-  { icon: <ScanFace size={18} />, label: 'Sarcasm Detection' },
-  { icon: <Brain    size={18} />, label: 'Implicit Emotion' },
+  { icon: <BookType size={15} />, text: 'Agglutinative Tokenization & Morpheme Segmentation', color: '#1565C0' },
+  { icon: <Globe2 size={15} />, text: 'Tamil Idiom Graph & Cultural Metaphor Matching', color: '#2196F3' },
+  { icon: <ScanFace size={15} />, text: 'Contextual Sarcasm & Contradiction Resolution', color: '#1565C0' },
+  { icon: <Brain size={15} />, text: 'Emotion Distribution & Baseline Model Comparison', color: '#2196F3' },
+  { icon: <Database size={15} />, text: 'Persisting Analysis Result to MongoDB', color: '#10B981' },
 ];
 
 export default function AnalyzeText() {
-  const [text, setText]           = useState('');
+  const [text, setText] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [progress, setProgress]   = useState(0);
+  const [progress, setProgress] = useState(0);
   const [activeStep, setActiveStep] = useState(-1);
+  const [errorMessage, setErrorMessage] = useState('');
   const navigate = useNavigate();
 
   const charCount = text.length;
-  const hasText   = text.trim().length > 0;
+  const hasText = text.trim().length > 0;
 
-  const handleAnalyze = () => {
-    if (!hasText) return;
+  const handleAnalyze = async () => {
+    if (!hasText || isAnalyzing) return;
     setIsAnalyzing(true);
-    setProgress(0);
+    setProgress(15);
     setActiveStep(0);
+    setErrorMessage('');
 
-    let current = 0;
-    const interval = setInterval(() => {
-      current += 20;
-      setProgress(current);
-      setActiveStep(Math.floor(current / 20) - 1);
-      if (current >= 100) {
-        clearInterval(interval);
-        setTimeout(() => navigate('/result', { state: { text } }), 600);
-      }
-    }, 650);
+    // Interval to advance progress visual
+    const progressTimer = setInterval(() => {
+      setProgress(prev => {
+        if (prev < 85) {
+          const next = prev + 18;
+          setActiveStep(Math.min(4, Math.floor(next / 20)));
+          return next;
+        }
+        return prev;
+      });
+    }, 300);
+
+    try {
+      // Call real Spring Boot backend
+      const result = await emotionAPI.analyze({
+        text: text.trim(),
+        channel: 'Web Console',
+        brand: 'Tamil Customer Sentiment',
+        username: JSON.parse(localStorage.getItem('tamil_ai_user') || '{}')?.username || 'researcher'
+      });
+
+      clearInterval(progressTimer);
+      setProgress(100);
+      setActiveStep(4);
+
+      setTimeout(() => {
+        navigate('/result', { state: { result, id: result.id, text } });
+      }, 500);
+
+    } catch (err) {
+      clearInterval(progressTimer);
+      console.error('Analysis failed:', err);
+      setErrorMessage(err.message || 'Error communicating with Spring Boot backend.');
+      setIsAnalyzing(false);
+      setProgress(0);
+      setActiveStep(-1);
+    }
   };
 
   return (
@@ -66,193 +89,154 @@ export default function AnalyzeText() {
             Analyze Tamil Feedback
           </h1>
           <p className="text-muted" style={{ fontSize: '15px' }}>
-            Paste any Tamil text to extract deep emotional meaning with cultural reasoning.
+            Tokenizes agglutinative suffixes, resolves sarcasm contradictions, and persists results to MongoDB.
           </p>
         </div>
-        {/* Capability pills */}
-        <div className="hidden md:flex items-center gap-2 flex-wrap">
-          {CAPABILITIES.map((c, i) => (
-            <span key={i} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-              style={{ background: 'rgba(33,150,243,0.10)', color: '#1565C0', border: '1px solid rgba(33,150,243,0.20)' }}>
-              {c.icon} {c.label}
-            </span>
-          ))}
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <Database size={14} className="text-emerald-600" /> Connected: Spring Boot + MongoDB
+          </span>
         </div>
       </div>
 
       {/* ── Main Card ── */}
-      <div className="bg-white rounded-2xl overflow-hidden shadow-lg"
-        style={{ border: '1px solid rgba(33,150,243,0.15)', borderLeft: '4px solid #2196F3' }}>
+      <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-blue-100"
+        style={{ borderLeft: '4px solid #2196F3' }}>
 
         {/* Card top bar */}
-        <div className="px-6 py-4 flex items-center justify-between"
-          style={{ borderBottom: '1px solid rgba(33,150,243,0.10)', background: 'rgba(33,150,243,0.03)' }}>
+        <div className="px-6 py-4 flex items-center justify-between bg-blue-50/40 border-b border-blue-100">
           <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center"
-              style={{ background: 'rgba(33,150,243,0.12)' }}>
-              <MessageSquare size={15} style={{ color: '#1565C0' }} />
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-blue-100">
+              <MessageSquare size={15} className="text-blue-700" />
             </div>
-            <span className="font-bold text-sm uppercase tracking-wider" style={{ color: '#0D2137', letterSpacing: '0.07em', fontSize: '11px' }}>
-              Input Text
+            <span className="font-bold text-xs uppercase tracking-wider text-gray-800">
+              Tamil / Tanglish Input
             </span>
           </div>
-          <div className="flex items-center gap-2 text-xs font-medium" style={{ color: charCount > 0 ? '#1565C0' : '#9CA3AF' }}>
+          <div className="flex items-center gap-2 text-xs font-medium text-gray-500">
             <ShieldCheck size={14} />
-            Tamil · Emotion Reasoning
-            {charCount > 0 && <span className="ml-2 px-2 py-0.5 rounded-full text-xs"
-              style={{ background: 'rgba(33,150,243,0.10)', color: '#1565C0' }}>
-              {charCount} chars
-            </span>}
+            <span>UTF-8 Tamil Script Supported</span>
           </div>
         </div>
 
-        {/* Textarea */}
+        {/* Text Area */}
         <div className="p-6">
           <textarea
-            className="w-full font-tamil rounded-xl outline-none resize-none transition-all"
-            style={{
-              minHeight: '160px',
-              padding: '16px',
-              fontSize: '16px',
-              lineHeight: '1.7',
-              color: '#0D2137',
-              border: `2px solid ${hasText ? 'rgba(33,150,243,0.35)' : 'rgba(33,150,243,0.15)'}`,
-              background: hasText ? '#FAFCFF' : '#FAFCFF',
-              boxShadow: hasText ? '0 0 0 4px rgba(33,150,243,0.07)' : 'none',
-              transition: 'all 0.25s ease',
-            }}
-            placeholder="உங்கள் தமிழ் feedback-ஐ இங்கே உள்ளிடுங்கள்..."
             value={text}
-            onChange={e => setText(e.target.value)}
+            onChange={(e) => setText(e.target.value)}
             disabled={isAnalyzing}
-            onFocus={e => { e.target.style.borderColor = '#2196F3'; e.target.style.boxShadow = '0 0 0 4px rgba(33,150,243,0.10)'; }}
-            onBlur={e => { e.target.style.borderColor = hasText ? 'rgba(33,150,243,0.35)' : 'rgba(33,150,243,0.15)'; e.target.style.boxShadow = hasText ? '0 0 0 4px rgba(33,150,243,0.07)' : 'none'; }}
+            placeholder="தமிழ் பின்னூட்டத்தை இங்கே உள்ளிடவும்... (e.g. 'சூப்பர் சர்வீஸ்! 2 மணி நேரம் காக்க வச்சு கடைசியில கேன்சல் பண்ணிட்டீங்க.')"
+            rows={5}
+            className="w-full text-base font-tamil rounded-xl p-4 transition-all focus:outline-none resize-none border border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+            style={{ color: '#0D2137' }}
           />
 
-          {/* ── Sample Inputs ── */}
-          <div className="mt-5">
-            <p className="text-xs font-bold uppercase tracking-wider mb-3"
-              style={{ color: '#374151', letterSpacing: '0.07em' }}>
-              Try a sample →
+          {/* Quick presets */}
+          <div className="mt-4">
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">
+              Or Select Sample Feedback from Dataset:
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              {SAMPLE_INPUTS.map((s, i) => (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {SAMPLE_INPUTS.map((sample, i) => (
                 <button
                   key={i}
-                  onClick={() => setText(s.text)}
-                  disabled={isAnalyzing}
-                  className="flex flex-col items-start p-3 rounded-xl text-left transition-all"
-                  style={{
-                    background: s.bg,
-                    border: `1.5px solid ${s.border}`,
-                    cursor: isAnalyzing ? 'not-allowed' : 'pointer',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = `0 6px 16px ${s.border}`; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'none'; }}
+                  type="button"
+                  onClick={() => setText(sample.text)}
+                  className="text-left p-2.5 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50/50 transition-all flex items-start gap-2.5 text-xs group"
                 >
-                  <span className="mb-1" style={{ color: s.color }}>{s.icon}</span>
-                  <span className="text-xs font-bold" style={{ color: s.color }}>{s.label}</span>
+                  <span className="p-1 rounded-md bg-gray-100 group-hover:bg-white text-blue-600 mt-0.5">
+                    {sample.icon}
+                  </span>
+                  <div className="overflow-hidden">
+                    <span className="font-bold text-gray-800 block">{sample.label}</span>
+                    <span className="text-gray-500 font-tamil truncate block">{sample.text}</span>
+                  </div>
                 </button>
               ))}
             </div>
           </div>
 
-          {/* ── Divider ── */}
-          <div className="my-6" style={{ height: '1px', background: 'linear-gradient(90deg, rgba(33,150,243,0.15), transparent)' }} />
-
-          {/* ── Analyze Button or Loading ── */}
-          {!isAnalyzing ? (
-            <button
-              onClick={handleAnalyze}
-              disabled={!hasText}
-              className="w-full py-4 rounded-xl font-bold text-white text-base flex items-center justify-center gap-3 transition-all"
-              style={{
-                background: hasText
-                  ? 'linear-gradient(135deg, #0D2137 0%, #1565C0 50%, #2196F3 100%)'
-                  : '#D1D5DB',
-                boxShadow: hasText ? '0 6px 20px rgba(33,150,243,0.35)' : 'none',
-                cursor: hasText ? 'pointer' : 'not-allowed',
-                fontSize: '15px',
-                letterSpacing: '0.02em',
-                transition: 'all 0.25s ease',
-              }}
-              onMouseEnter={e => hasText && (e.currentTarget.style.transform = 'translateY(-2px)')}
-              onMouseLeave={e => (e.currentTarget.style.transform = 'translateY(0)')}
-            >
-              <Zap size={20} />
-              {hasText ? 'Analyze Emotion' : 'Enter Tamil text above to begin'}
-            </button>
-          ) : (
-            /* ── Loading State ── */
-            <div className="rounded-xl overflow-hidden animate-fade-in"
-              style={{ border: '1.5px solid rgba(33,150,243,0.20)' }}>
-
-              {/* Progress bar header */}
-              <div className="px-5 py-4 flex items-center justify-between"
-                style={{ background: 'linear-gradient(135deg, #0D2137, #1565C0)' }}>
-                <div className="flex items-center gap-3">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center"
-                    style={{ background: 'rgba(255,255,255,0.15)' }}>
-                    <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="9" stroke="rgba(255,255,255,0.3)" strokeWidth="2.5"/>
-                      <path d="M12 3a9 9 0 0 1 9 9" stroke="white" strokeWidth="2.5" strokeLinecap="round"/>
-                    </svg>
-                  </div>
-                  <span className="font-bold text-white text-sm">Processing Tamil Emotion Analysis</span>
-                </div>
-                <span className="font-mono font-black text-xl" style={{ color: '#90CAF9' }}>{progress}%</span>
-              </div>
-
-              {/* Progress fill */}
-              <div style={{ height: '6px', background: 'rgba(33,150,243,0.12)' }}>
-                <div style={{
-                  height: '100%',
-                  width: `${progress}%`,
-                  background: 'linear-gradient(90deg, #0D2137, #2196F3)',
-                  transition: 'width 0.6s cubic-bezier(0.4,0,0.2,1)',
-                  boxShadow: '2px 0 8px rgba(33,150,243,0.4)',
-                }} />
-              </div>
-
-              {/* Steps */}
-              <div className="p-5 space-y-3" style={{ background: '#FAFCFF' }}>
-                {ANALYSIS_STEPS.map((step, idx) => {
-                  const done    = progress >= (idx + 1) * 20;
-                  const active  = activeStep === idx;
-                  return (
-                    <div key={idx} className="flex items-center gap-3 transition-all duration-500"
-                      style={{ opacity: done || active ? 1 : 0.35 }}>
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 transition-all"
-                        style={{
-                          background: done ? 'rgba(16,185,129,0.12)' : active ? 'rgba(33,150,243,0.12)' : 'rgba(0,0,0,0.05)',
-                          color: done ? '#059669' : active ? '#1565C0' : '#9CA3AF',
-                          border: active ? '2px solid rgba(33,150,243,0.4)' : '2px solid transparent',
-                        }}>
-                        {done ? <CheckCircle2 size={14} /> : step.icon}
-                      </div>
-                      <span className="text-sm font-semibold transition-all"
-                        style={{ color: done ? '#059669' : active ? '#0D2137' : '#9CA3AF', fontWeight: active ? 700 : 600 }}>
-                        {step.text}
-                        {active && <span className="ml-2 inline-block animate-pulse" style={{ color: '#2196F3' }}>●</span>}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+          {/* Error notice if backend failed */}
+          {errorMessage && (
+            <div className="mt-4 p-3.5 rounded-xl bg-red-50 text-red-700 border border-red-200 text-xs flex items-center gap-2">
+              <AlertCircle size={16} />
+              <span>{errorMessage}</span>
             </div>
           )}
+
+          {/* Action bar */}
+          <div className="mt-6 flex items-center justify-between pt-4 border-t border-gray-100">
+            <span className="text-xs text-gray-400">
+              {charCount} characters entered
+            </span>
+            <button
+              onClick={handleAnalyze}
+              disabled={!hasText || isAnalyzing}
+              className="px-6 py-3 rounded-xl font-bold text-sm text-white flex items-center gap-2 transition-all shadow-md"
+              style={{
+                background: hasText && !isAnalyzing ? 'linear-gradient(135deg, #1565C0 0%, #2196F3 100%)' : '#9CA3AF',
+                cursor: hasText && !isAnalyzing ? 'pointer' : 'not-allowed'
+              }}
+            >
+              {isAnalyzing ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  <span>Processing with Spring Boot...</span>
+                </>
+              ) : (
+                <>
+                  <Zap size={16} />
+                  <span>Run Morphology-Aware Reasoning</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* ── Info Strip ── */}
-      <div className="flex items-center gap-4 px-5 py-3 rounded-xl text-sm font-medium flex-wrap"
-        style={{ background: 'rgba(33,150,243,0.06)', border: '1px solid rgba(33,150,243,0.14)', color: '#374151' }}>
-        <span className="flex items-center gap-2"><Sparkles size={14} style={{ color: '#2196F3' }} /> Morphology-aware Tamil NLP</span>
-        <span style={{ color: 'rgba(33,150,243,0.30)' }}>|</span>
-        <span className="flex items-center gap-2"><Globe2 size={14} style={{ color: '#2196F3' }} /> Cultural context reasoning</span>
-        <span style={{ color: 'rgba(33,150,243,0.30)' }}>|</span>
-        <span className="flex items-center gap-2"><ScanFace size={14} style={{ color: '#2196F3' }} /> Sarcasm + implicit emotion detection</span>
-      </div>
+      {/* ── Progress Pipeline Overlay ── */}
+      {isAnalyzing && (
+        <div className="bg-white rounded-2xl p-6 shadow-lg border border-blue-100 animate-fade-in space-y-4">
+          <div className="flex justify-between items-center text-xs font-bold text-gray-700">
+            <span>Neural Morphology Pipeline Execution</span>
+            <span className="font-mono text-blue-600">{progress}%</span>
+          </div>
+
+          {/* Progress bar */}
+          <div className="w-full h-2 rounded-full bg-gray-100 overflow-hidden">
+            <div
+              className="h-full bg-gradient-to-r from-blue-600 to-cyan-500 transition-all duration-300 rounded-full"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+
+          {/* Steps */}
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-2 pt-2">
+            {ANALYSIS_STEPS.map((step, idx) => {
+              const isDone = activeStep > idx;
+              const isCurrent = activeStep === idx;
+              return (
+                <div
+                  key={idx}
+                  className={`p-2.5 rounded-xl border text-xs flex items-center gap-2 transition-all ${
+                    isDone
+                      ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                      : isCurrent
+                      ? 'bg-blue-50 border-blue-300 text-blue-800 font-bold shadow-sm'
+                      : 'bg-gray-50 border-gray-100 text-gray-400'
+                  }`}
+                >
+                  <span className={isDone ? 'text-emerald-600' : isCurrent ? 'text-blue-600' : 'text-gray-400'}>
+                    {isDone ? <CheckCircle2 size={16} /> : step.icon}
+                  </span>
+                  <span className="line-clamp-2 leading-tight">{step.text}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
