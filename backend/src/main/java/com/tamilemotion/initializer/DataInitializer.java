@@ -74,13 +74,24 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void seedMorphologicalRules() {
-        if (ruleRepository.count() == 0) {
-            ruleRepository.save(new MorphologicalRule("-அல (-ala)", "Negative verb suffix", "வரல (Didn't arrive)", "Elevates Frustration & Dissatisfaction (+0.35)"));
-            ruleRepository.save(new MorphologicalRule("-உம் (-um)", "Inclusive particle", "பணமும் (Money also)", "Triggers escalation when attached to unfulfilled demands"));
-            ruleRepository.save(new MorphologicalRule("-இட்டாங்க (-ittaanga)", "Aspectual completive", "பண்ணிட்டாங்க (Done completely)", "Action completion marker"));
-            ruleRepository.save(new MorphologicalRule("-உல்+அ (-ulla)", "Locative case marker", "வீட்டுக்குள்ள (Inside home)", "Spatial boundary indicator for signal/service failures"));
-            ruleRepository.save(new MorphologicalRule("-ஏ (-ae)", "Emphatic suffix", "ரொம்பவே (Excessively)", "Sarcasm indicator when paired with opposite sentiment root"));
-            System.out.println(">> [DataInitializer] Morphological Suffix Rules seeded.");
+        saveRuleIfMissing("-அல (-ala)", "Negative verb suffix", "வரல (Didn't arrive)", "Elevates Frustration & Dissatisfaction (+0.35)");
+        saveRuleIfMissing("-உம் (-um)", "Inclusive particle", "பணமும் (Money also)", "Triggers escalation when attached to unfulfilled demands");
+        saveRuleIfMissing("-இட்டாங்க (-ittaanga)", "Aspectual completive", "பண்ணிட்டாங்க (Done completely)", "Action completion marker");
+        saveRuleIfMissing("-உல்+அ (-ulla)", "Locative case marker", "வீட்டுக்குள்ள (Inside home)", "Spatial boundary indicator for signal/service failures");
+        saveRuleIfMissing("-ஏ (-ae)", "Emphatic suffix", "ரொம்பவே (Excessively)", "Sarcasm indicator when paired with opposite sentiment root");
+        saveRuleIfMissing("-மாட்றாங்க (-maattraanga)", "Negative refusal auxiliary", "எடுக்கவே மாட்றாங்க (Refusing to attend)", "Flags implicit customer frustration and support abandonment");
+        saveRuleIfMissing("-வைத்ததற்கு (-vaithadharku)", "Causative dative suffix", "காத்திருக்க வைத்ததற்கு (For making me wait)", "Sarcastic causal justification in complaints");
+        saveRuleIfMissing("-ஆச்சு (-aachu)", "Completive aspectual duration", "3 வாரம் ஆச்சு (3 weeks elapsed)", "Amplifies delivery delay severity score");
+        saveRuleIfMissing("-ஐ (-ai)", "Accusative case marker", "பொருளை / ஆர்டரை (The product/order)", "Direct patient/object target of service failure");
+        saveRuleIfMissing("-க்கு (-kku)", "Dative case marker", "டைமுக்கு / எனக்கு (On time / to me)", "Expectation boundary marker");
+        saveRuleIfMissing("-இல்லை (-illai)", "Existential negation", "வொர்த்தே இல்ல (No worth at all)", "Absolute quality negation");
+        saveRuleIfMissing("-வில்ல (-villai)", "Formal verbal negation", "வரவில்லை (Did not arrive)", "Formal statement of non-delivery");
+        System.out.println(">> [DataInitializer] Comprehensive Tamil Morphological Rules verified and updated.");
+    }
+
+    private void saveRuleIfMissing(String suffix, String functionName, String example, String emotionImpact) {
+        if (ruleRepository.findBySuffix(suffix).isEmpty()) {
+            ruleRepository.save(new MorphologicalRule(suffix, functionName, example, emotionImpact));
         }
     }
 
