@@ -22,7 +22,14 @@ async function request(endpoint, options = {}) {
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
-      const errorMsg = data?.message || `Request failed with status ${response.status}`;
+      if (response.status === 401 && !endpoint.startsWith('/auth/')) {
+        localStorage.removeItem('tamil_ai_token');
+        localStorage.removeItem('tamil_ai_user');
+        if (window.location.pathname !== '/') {
+          window.location.href = '/';
+        }
+      }
+      const errorMsg = data?.message || data?.error || `Request failed with status ${response.status}`;
       throw new Error(errorMsg);
     }
 

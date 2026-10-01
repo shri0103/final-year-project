@@ -4,11 +4,12 @@ import com.tamilemotion.dto.AuthRequest;
 import com.tamilemotion.dto.AuthResponse;
 import com.tamilemotion.model.User;
 import com.tamilemotion.repository.UserRepository;
+import com.tamilemotion.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -16,34 +17,45 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
     public AuthResponse login(AuthRequest request) {
         String username = request.getUsername() != null ? request.getUsername().trim() : "";
         String password = request.getPassword() != null ? request.getPassword().trim() : "";
 
         if (username.isEmpty() || password.isEmpty()) {
-            return AuthResponse.error("Username and password are required");
+            return AuthResponse.error("Username and password are required.");
         }
 
         Optional<User> userOpt = userRepository.findByUsername(username);
-        if (userOpt.isPresent()) {
-            User user = userOpt.get();
-            if (user.getPassword().equals(password)) {
-                String token = "jwt-" + UUID.randomUUID().toString();
-                return AuthResponse.success(token, user.getUsername(), user.getRole(), user.getFullName());
-            } else {
-                return AuthResponse.error("Invalid credentials. Please verify your password.");
-            }
+        if (userOpt.isEmpty()) {
+            return AuthResponse.error("Invalid credentials. User '" + username + "' not found.");
         }
 
-        // Demo fallback: if logging in for demo, create the user or accept default demo
-        if ("admin".equalsIgnoreCase(username) || "demo".equalsIgnoreCase(username) || "researcher".equalsIgnoreCase(username)) {
-            User newUser = new User(username, username + "@tamilemotion.ai", password, "RESEARCHER", username.toUpperCase() + " AI Lab");
-            userRepository.save(newUser);
-            String token = "jwt-" + UUID.randomUUID().toString();
-            return AuthResponse.success(token, newUser.getUsername(), newUser.getRole(), newUser.getFullName());
+        User user = userOpt.get();
+        boolean passwordMatches = false;
+
+        // Secure BCrypt comparison with auto-upgrade for legacy records
+        if (user.getPassword() != null && (user.getPassword().startsWith("$2a$") || user.getPassword().startsWith("$2b$") || user.getPassword().startsWith("$2y$"))) {
+            passwordMatches = passwordEncoder.matches(password, user.getPassword());
+        } else if (user.getPassword() != null && user.getPassword().equals(password)) {
+            // Upgrade legacy plain-text password to BCrypt hash
+            user.setPassword(passwordEncoder.encode(password));
+            userRepository.save(user);
+            passwordMatches = true;
         }
 
-        return AuthResponse.error("User '" + username + "' not found. You can register or use admin / admin123");
+        if (!passwordMatches) {
+            return AuthResponse.error("Invalid credentials. Please verify your password.");
+        }
+
+        // Generate cryptographically signed JWT token with claims
+        String token = jwtTokenProvider.generateToken(user);
+        return AuthResponse.success(token, user.getUsername(), user.getRole(), user.getFullName());
     }
 
     public AuthResponse register(AuthRequest request) {
@@ -52,17 +64,30 @@ public class AuthService {
         String email = request.getEmail() != null ? request.getEmail().trim() : "";
 
         if (username.isEmpty() || password.isEmpty()) {
-            return AuthResponse.error("Username and password are required");
+            return AuthResponse.error("Username and password are required.");
+        }
+
+        if (password.length() < 6) {
+            return AuthResponse.error("Password must be at least 6 characters long.");
         }
 
         if (userRepository.existsByUsername(username)) {
-            return AuthResponse.error("Username '" + username + "' already exists");
+            return AuthResponse.error("Username '" + username + "' is already taken.");
         }
 
-        User user = new User(username, email, password, "RESEARCHER", request.getFullName() != null ? request.getFullName() : username);
+        // Hash password with BCrypt before storing in MongoDB
+        String hashedPassword = passwordEncoder.encode(password);
+        User user = new User(
+                username,
+                email,
+                hashedPassword,
+                "RESEARCHER",
+                request.getFullName() != null && !request.getFullName().isBlank() ? request.getFullName().trim() : username
+        );
         userRepository.save(user);
 
-        String token = "jwt-" + UUID.randomUUID().toString();
+        // Generate real signed JWT
+        String token = jwtTokenProvider.generateToken(user);
         return AuthResponse.success(token, user.getUsername(), user.getRole(), user.getFullName());
     }
 }

@@ -30,6 +30,9 @@ public class DataInitializer implements CommandLineRunner {
     @Autowired
     private EmotionAnalysisRepository analysisRepository;
 
+    @Autowired
+    private org.springframework.security.crypto.password.PasswordEncoder passwordEncoder;
+
     @Override
     public void run(String... args) {
         seedUsers();
@@ -43,10 +46,20 @@ public class DataInitializer implements CommandLineRunner {
 
     private void seedUsers() {
         if (userRepository.count() == 0) {
-            userRepository.save(new User("admin", "admin@tamilemotion.ai", "admin123", "ADMIN", "Lead NLP Researcher"));
-            userRepository.save(new User("researcher", "research@tamilemotion.ai", "tamilai2026", "RESEARCHER", "Tamil AI Analyst"));
-            userRepository.save(new User("demo", "demo@tamilemotion.ai", "demo123", "RESEARCHER", "Demo Evaluator"));
-            System.out.println(">> [DataInitializer] Default Users seeded: admin / admin123, researcher / tamilai2026");
+            userRepository.save(new User("admin", "admin@tamilemotion.ai", passwordEncoder.encode("admin123"), "ADMIN", "Lead NLP Researcher"));
+            userRepository.save(new User("researcher", "research@tamilemotion.ai", passwordEncoder.encode("tamilai2026"), "RESEARCHER", "Tamil AI Analyst"));
+            userRepository.save(new User("demo", "demo@tamilemotion.ai", passwordEncoder.encode("demo123"), "RESEARCHER", "Demo Evaluator"));
+            System.out.println(">> [DataInitializer] Default Users seeded with BCrypt passwords: admin / admin123, researcher / tamilai2026");
+        } else {
+            // Upgrade any existing users that have plain text passwords
+            List<User> existing = userRepository.findAll();
+            for (User u : existing) {
+                if (u.getPassword() != null && !u.getPassword().startsWith("$2a$") && !u.getPassword().startsWith("$2b$") && !u.getPassword().startsWith("$2y$")) {
+                    u.setPassword(passwordEncoder.encode(u.getPassword()));
+                    userRepository.save(u);
+                    System.out.println(">> [DataInitializer] Upgraded user '" + u.getUsername() + "' password to BCrypt hash.");
+                }
+            }
         }
     }
 
