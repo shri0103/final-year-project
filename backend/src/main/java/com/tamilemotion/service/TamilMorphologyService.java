@@ -140,6 +140,107 @@ public class TamilMorphologyService {
         BASE_ROOTS.put("ஒரு", new TokenProfile("ஒரு", "Numeral Adjective", null, "Indefinite singular modifier (A/One)"));
     }
 
+    // Static Tanglish (Code-Mixed Tamil written in Latin script) Phonetic Lexicon
+    private static final Map<String, TokenProfile> TANGLISH_ROOTS = new HashMap<>();
+
+    static {
+        // Pronouns & Dative Experiencers
+        TANGLISH_ROOTS.put("enaku", new TokenProfile("நான் (enaku)", "Pronoun+Dative", "-ku (Dative)", "First-person dative experiencer (To me)"));
+        TANGLISH_ROOTS.put("enakku", new TokenProfile("நான் (enakku)", "Pronoun+Dative", "-ku (Dative)", "First-person dative experiencer (To me)"));
+        TANGLISH_ROOTS.put("unaku", new TokenProfile("நீ (unaku)", "Pronoun+Dative", "-ku (Dative)", "Second-person dative (To you)"));
+        TANGLISH_ROOTS.put("unakku", new TokenProfile("நீ (unakku)", "Pronoun+Dative", "-ku (Dative)", "Second-person dative (To you)"));
+        TANGLISH_ROOTS.put("engaluku", new TokenProfile("நாங்கள்", "Pronoun+Dative", "-ku (Dative)", "First-person plural dative (To us)"));
+        TANGLISH_ROOTS.put("ungaluku", new TokenProfile("நீங்கள்", "Pronoun+Dative", "-ku (Dative)", "Second-person plural dative (To you all)"));
+
+        // Emotion States & Slangs (Tanglish Irritation / Frustration / Anger)
+        TANGLISH_ROOTS.put("kadupa", new TokenProfile("கடுப்பு (kaduppu)", "Colloquial Emotion Adverb", "-a (Adverbializer)", "Extreme irritation / High Frustration"));
+        TANGLISH_ROOTS.put("kaduppa", new TokenProfile("கடுப்பு (kaduppu)", "Colloquial Emotion Adverb", "-a (Adverbializer)", "Extreme irritation / High Frustration"));
+        TANGLISH_ROOTS.put("kaduppu", new TokenProfile("கடுப்பு (kaduppu)", "Emotion Noun", null, "Extreme irritation / Annoyance"));
+        TANGLISH_ROOTS.put("kadupu", new TokenProfile("கடுப்பு (kaduppu)", "Emotion Noun", null, "Extreme irritation / Annoyance"));
+        TANGLISH_ROOTS.put("kadupethuraanga", new TokenProfile("கடுப்பு", "Agglutinative Verb", "-ethu-raanga", "Deliberately aggravating / annoying"));
+        TANGLISH_ROOTS.put("gaandu", new TokenProfile("காண்டு (gaandu)", "Slang Emotion Noun", null, "Peak exasperation / Rage trigger"));
+        TANGLISH_ROOTS.put("erichal", new TokenProfile("எரிச்சல்", "Emotion Noun", null, "Annoyance / Burning frustration"));
+        TANGLISH_ROOTS.put("erichala", new TokenProfile("எரிச்சல்", "Emotion Adverb", "-a", "Annoying / Exasperating state"));
+        TANGLISH_ROOTS.put("kovam", new TokenProfile("கோபம் (kovam)", "Emotion Noun", null, "Anger / Outrage"));
+        TANGLISH_ROOTS.put("kobam", new TokenProfile("கோபம் (kobam)", "Emotion Noun", null, "Anger / Outrage"));
+
+        // Tanglish Verbs & Auxiliaries (States & Actions)
+        TANGLISH_ROOTS.put("eruku", new TokenProfile("இரு (irukku)", "Auxiliary Verb", null, "Present continuous affective state (It is / I am feeling)"));
+        TANGLISH_ROOTS.put("irukku", new TokenProfile("இரு (irukku)", "Auxiliary Verb", null, "Present continuous affective state (It is / I am feeling)"));
+        TANGLISH_ROOTS.put("iruku", new TokenProfile("இரு (irukku)", "Auxiliary Verb", null, "Present continuous affective state"));
+        TANGLISH_ROOTS.put("erundhuchu", new TokenProfile("இரு", "Past Verb", null, "Confirmed past state (Was)"));
+        TANGLISH_ROOTS.put("irundhuchu", new TokenProfile("இரு", "Past Verb", null, "Confirmed past state (Was)"));
+        TANGLISH_ROOTS.put("irundhathu", new TokenProfile("இரு", "Past Verb", null, "Confirmed past state (Was)"));
+        TANGLISH_ROOTS.put("aachu", new TokenProfile("ஆகு (aachu)", "Past Verb", "-aachu (Completive Aspect)", "Elapsed duration flag (It became / elapsed)"));
+        TANGLISH_ROOTS.put("aachi", new TokenProfile("ஆகு (aachi)", "Past Verb", "-aachi (Completive Aspect)", "Elapsed duration flag"));
+
+        // Tanglish Negative Verbal Inflections
+        TANGLISH_ROOTS.put("varala", new TokenProfile("வரு (varala)", "Negative Verb", "-ala (Negative Suffix)", "Non-arrival / Delivery failure flag"));
+        TANGLISH_ROOTS.put("varale", new TokenProfile("வரு (varale)", "Negative Verb", "-ala (Negative Suffix)", "Non-arrival / Delivery failure flag"));
+        TANGLISH_ROOTS.put("varalai", new TokenProfile("வரு (varalai)", "Negative Verb", "-ala (Negative Suffix)", "Non-arrival / Delivery failure flag"));
+        TANGLISH_ROOTS.put("aagala", new TokenProfile("ஆகு (aagala)", "Negative Verb", "-ala (Negative Suffix)", "Non-occurrence / Process failure flag"));
+        TANGLISH_ROOTS.put("aagale", new TokenProfile("ஆகு (aagale)", "Negative Verb", "-ala (Negative Suffix)", "Non-occurrence / Process failure flag"));
+        TANGLISH_ROOTS.put("kedaikala", new TokenProfile("கிடை (kedaikala)", "Negative Verb", "-ala (Negative Suffix)", "Non-receipt of product"));
+        TANGLISH_ROOTS.put("kidaikkala", new TokenProfile("கிடை (kidaikkala)", "Negative Verb", "-ala (Negative Suffix)", "Non-receipt of product"));
+        TANGLISH_ROOTS.put("kudukkala", new TokenProfile("கொடு (kudukkala)", "Negative Verb", "-ala (Negative Suffix)", "Non-refund / Missing return"));
+        TANGLISH_ROOTS.put("kudukala", new TokenProfile("கொடு (kudukala)", "Negative Verb", "-ala (Negative Suffix)", "Non-refund / Missing return"));
+        TANGLISH_ROOTS.put("edukala", new TokenProfile("எடு (edukala)", "Negative Verb", "-ala (Negative Suffix)", "Unanswered call / Non-attendance"));
+        TANGLISH_ROOTS.put("edukkala", new TokenProfile("எடு (edukkala)", "Negative Verb", "-ala (Negative Suffix)", "Unanswered call / Non-attendance"));
+        TANGLISH_ROOTS.put("edukkavae", new TokenProfile("எடு (edukkavae)", "Verb+Emphatic", "-vae (Emphatic Negative)", "Strong negative emphatic (Not even picking)"));
+        TANGLISH_ROOTS.put("edukave", new TokenProfile("எடு (edukave)", "Verb+Emphatic", "-ve (Emphatic Negative)", "Strong negative emphatic (Not even picking)"));
+        TANGLISH_ROOTS.put("panla", new TokenProfile("பண்ணு (panla)", "Negative Verb", "-ala (Negative Suffix)", "Action omitted"));
+        TANGLISH_ROOTS.put("pannala", new TokenProfile("பண்ணு (pannala)", "Negative Verb", "-ala (Negative Suffix)", "Action omitted"));
+        TANGLISH_ROOTS.put("panna", new TokenProfile("பண்ணு (panna)", "Conditional Verb", "-a (Conditional)", "Action initiation condition"));
+        TANGLISH_ROOTS.put("pannitaanga", new TokenProfile("பண்ணு (pannitaanga)", "Verb+Aspect", "-ittaanga (Completive)", "Action completed"));
+        TANGLISH_ROOTS.put("pannittaanga", new TokenProfile("பண்ணு (pannittaanga)", "Verb+Aspect", "-ittaanga (Completive)", "Action completed"));
+        TANGLISH_ROOTS.put("panniteenga", new TokenProfile("பண்ணு (panniteenga)", "Verb+Aspect", "-itteenga (Completive)", "Merchant action completed"));
+        TANGLISH_ROOTS.put("pannitteenga", new TokenProfile("பண்ணு (pannitteenga)", "Verb+Aspect", "-itteenga (Completive)", "Merchant action completed"));
+        TANGLISH_ROOTS.put("seiringa", new TokenProfile("செய் (seiringa)", "Verb+Honorific", "-reenga (Honorific)", "Performing service"));
+        TANGLISH_ROOTS.put("seireenga", new TokenProfile("செய் (seireenga)", "Verb+Honorific", "-reenga (Honorific)", "Performing service"));
+        TANGLISH_ROOTS.put("maatraanga", new TokenProfile("மாட்டு (maatraanga)", "Negative Verb", "-raanga (3rd Plural Refusal)", "Persistent support refusal / unresponsiveness"));
+        TANGLISH_ROOTS.put("maatran", new TokenProfile("மாட்டு (maatran)", "Negative Verb", "-an (Refusal)", "Support refusal / non-answering"));
+        TANGLISH_ROOTS.put("maatrangal", new TokenProfile("மாட்டு (maatrangal)", "Negative Verb", "-angal (Refusal)", "Support refusal"));
+        TANGLISH_ROOTS.put("maatenguthu", new TokenProfile("மாட்டு (maatenguthu)", "Negative Verb", "-enguthu (Refusal)", "System refusal to operate"));
+        TANGLISH_ROOTS.put("illa", new TokenProfile("இல் (illa)", "Negative Predicate", null, "Colloquial negation (No / Not)"));
+        TANGLISH_ROOTS.put("illai", new TokenProfile("இல் (illai)", "Negative Predicate", null, "Negation (No / Not)"));
+
+        // Tanglish Conjunctives & Target Nouns
+        TANGLISH_ROOTS.put("porulum", new TokenProfile("பொருள் (porul)", "Noun+Conjunctive", "-um (Inclusive)", "Delivered item target (Inclusive)"));
+        TANGLISH_ROOTS.put("panamum", new TokenProfile("பணம் (panam)", "Noun+Conjunctive", "-um (Inclusive)", "Monetary asset / Refund target"));
+        TANGLISH_ROOTS.put("neramum", new TokenProfile("நேரம் (neram)", "Noun+Conjunctive", "-um (Inclusive)", "Elapsed temporal demand"));
+        TANGLISH_ROOTS.put("porul", new TokenProfile("பொருள் (porul)", "Noun", null, "Delivered consignment item"));
+        TANGLISH_ROOTS.put("panam", new TokenProfile("பணம் (panam)", "Noun", null, "Monetary asset / Payment sum"));
+        TANGLISH_ROOTS.put("thirumba", new TokenProfile("திரும்பு (thirumba)", "Adverb", null, "Return / Reversal status"));
+        TANGLISH_ROOTS.put("vaaram", new TokenProfile("வாரம் (vaaram)", "Time Noun", null, "Duration unit (Week)"));
+        TANGLISH_ROOTS.put("neram", new TokenProfile("நேரம் (neram)", "Duration Noun", null, "Elapsed duration parameter"));
+        TANGLISH_ROOTS.put("mani", new TokenProfile("மணி (mani)", "Time Noun", null, "Duration parameter (Hour)"));
+        TANGLISH_ROOTS.put("kaakka", new TokenProfile("காத்திரு (kaakka)", "Infinitive Verb", null, "Forced customer waiting"));
+        TANGLISH_ROOTS.put("vachu", new TokenProfile("வை (vachu)", "Causative Verb", null, "Imposed delay causation"));
+        TANGLISH_ROOTS.put("vechu", new TokenProfile("வை (vechu)", "Causative Verb", null, "Imposed delay causation"));
+        TANGLISH_ROOTS.put("kadaisiyila", new TokenProfile("கடைசி (kadaisila)", "Time Noun+Locative", null, "Terminal stage / At last"));
+        TANGLISH_ROOTS.put("kadaisila", new TokenProfile("கடைசி (kadaisila)", "Time Noun+Locative", null, "Terminal stage / At last"));
+        TANGLISH_ROOTS.put("sevai", new TokenProfile("சேவை (sevai)", "Noun", null, "Customer service target"));
+
+        // Tanglish Praise, Criticism & Slang
+        TANGLISH_ROOTS.put("romba", new TokenProfile("ரொம்ப (romba)", "Adverb", null, "Intensifier (Very / Extremely)"));
+        TANGLISH_ROOTS.put("remba", new TokenProfile("ரொம்ப (remba)", "Adverb", null, "Intensifier (Very / Extremely)"));
+        TANGLISH_ROOTS.put("nalla", new TokenProfile("நன்மை (nalla)", "Adjective+Adverbializer", "-a", "Literal positive quality tag"));
+        TANGLISH_ROOTS.put("nallaa", new TokenProfile("நன்மை (nalla)", "Adjective+Adverbializer", "-a", "Literal positive quality tag"));
+        TANGLISH_ROOTS.put("super", new TokenProfile("சூப்பர் (super)", "Colloquial Praise", null, "Superficial literal praise / Sarcasm anchor"));
+        TANGLISH_ROOTS.put("semma", new TokenProfile("செமை (semma)", "Colloquial Adjective", null, "Superb / Top notch rating"));
+        TANGLISH_ROOTS.put("mass", new TokenProfile("மாஸ் (mass)", "Slang Praise", null, "Excellence / Grand impact"));
+        TANGLISH_ROOTS.put("aruma", new TokenProfile("அருமை (aruma)", "Adjective", null, "Excellence / Outstanding quality"));
+        TANGLISH_ROOTS.put("waste", new TokenProfile("வேஸ்ட் (waste)", "Colloquial Adjective", null, "Complete loss / Zero value"));
+        TANGLISH_ROOTS.put("worst", new TokenProfile("மோசம் (worst)", "Negative Adjective", null, "Severe degradation of quality / Poor"));
+        TANGLISH_ROOTS.put("mokka", new TokenProfile("மொக்க (mokka)", "Slang Adjective", null, "Substandard quality / Pointless failure"));
+        TANGLISH_ROOTS.put("mokkai", new TokenProfile("மொக்க (mokka)", "Slang Adjective", null, "Substandard quality / Pointless failure"));
+        TANGLISH_ROOTS.put("fraud", new TokenProfile("ஏமாற்று (fraud)", "Grievance Noun", null, "Fraudulent transaction claim"));
+        TANGLISH_ROOTS.put("cheat", new TokenProfile("ஏமாற்று (cheat)", "Grievance Noun", null, "Cheating / Breach of trust"));
+        TANGLISH_ROOTS.put("cancel", new TokenProfile("கேன்சல் (cancel)", "Transaction Verb", null, "Order revocation / cancellation"));
+        TANGLISH_ROOTS.put("da", new TokenProfile("டா (da)", "Affective Vocative", null, "Informal conversational clitic"));
+        TANGLISH_ROOTS.put("pa", new TokenProfile("ப்பா (pa)", "Affective Vocative", null, "Earnest emotional plea / exclamation"));
+    }
+
     /**
      * Decomposes input Tamil text into a list of morphology tokens, preserving all
      * Unicode combining marks and restoring true grammatical base lemmas.
@@ -161,16 +262,24 @@ public class TamilMorphologyService {
             String clean = raw.replaceAll("[^\\p{L}\\p{M}\\p{Nd}]", "");
             if (clean.isEmpty()) continue;
 
-            // 1. Direct match in static base dictionary
+            // 1. Direct match in static base dictionary (Tamil script)
             if (BASE_ROOTS.containsKey(clean)) {
                 TokenProfile p = BASE_ROOTS.get(clean);
                 results.add(new MorphologyToken(raw, p.root, p.pos, p.suffix, p.semantic));
                 continue;
             }
 
-            // 2. Direct match in dynamic MongoDB slang repository
-            if (dynamicSlangMap.containsKey(clean.toLowerCase())) {
-                SlangLexiconEntry slang = dynamicSlangMap.get(clean.toLowerCase());
+            // 2. Direct match in Tanglish (Code-Mixed / Romanized Tamil) dictionary
+            String cleanLower = clean.toLowerCase();
+            if (TANGLISH_ROOTS.containsKey(cleanLower)) {
+                TokenProfile p = TANGLISH_ROOTS.get(cleanLower);
+                results.add(new MorphologyToken(raw, p.root, p.pos, p.suffix, p.semantic));
+                continue;
+            }
+
+            // 3. Direct match in dynamic MongoDB slang repository
+            if (dynamicSlangMap.containsKey(cleanLower)) {
+                SlangLexiconEntry slang = dynamicSlangMap.get(cleanLower);
                 results.add(new MorphologyToken(
                         raw,
                         slang.getTerm(),
@@ -181,7 +290,7 @@ public class TamilMorphologyService {
                 continue;
             }
 
-            // 3. Rule-based morphological decomposition & Sandhi restoration
+            // 4. Rule-based morphological decomposition & Sandhi restoration
             MorphologyToken inferred = decomposeAffixes(raw, clean);
             results.add(inferred);
         }
@@ -197,6 +306,55 @@ public class TamilMorphologyService {
         String pos = "Content Word";
         String suffix = null;
         String semantic = "General Tamil context token";
+
+        String cleanLower = clean.toLowerCase();
+
+        // Tanglish Suffixes (for Romanized Tamil input)
+        if (clean.matches("[a-zA-Z0-9]+")) {
+            if (cleanLower.endsWith("maatraanga") || cleanLower.endsWith("maatran") || cleanLower.endsWith("maatrangal")) {
+                root = "மாட்டு (refusal)";
+                pos = "Negative Auxiliary Verb";
+                suffix = "-maatraanga (Tanglish Refusal)";
+                semantic = "Support refusal / Unresponsive operational state";
+            } else if (cleanLower.endsWith("varala") || cleanLower.endsWith("aagala") || cleanLower.endsWith("kedaikala")
+                    || cleanLower.endsWith("kudukkala") || cleanLower.endsWith("panla") || cleanLower.endsWith("pannala")) {
+                root = cleanLower.replaceFirst("(ala|la)$", "");
+                pos = "Negative Verb";
+                suffix = "-ala (Tanglish Negative Verb Suffix)";
+                semantic = "Non-arrival / Unfulfilled delivery or process failure flag";
+            } else if (cleanLower.endsWith("edukkavae") || cleanLower.endsWith("edukave")) {
+                root = "எடு (edukavae)";
+                pos = "Verb+Emphatic";
+                suffix = "-vae (Tanglish Emphatic Negative)";
+                semantic = "Strong negative emphatic (Not even picking call)";
+            } else if (cleanLower.endsWith("kadupa") || cleanLower.endsWith("kaduppa") || cleanLower.endsWith("kaduppu")) {
+                root = "கடுப்பு (kaduppu)";
+                pos = "Colloquial Emotion Adverb";
+                suffix = "-a (Adverbializer)";
+                semantic = "Extreme irritation / High Frustration";
+            } else if (cleanLower.endsWith("porulum") || cleanLower.endsWith("panamum") || cleanLower.endsWith("neramum")) {
+                root = cleanLower.substring(0, cleanLower.length() - 2);
+                pos = "Noun+Conjunctive";
+                suffix = "-um (Tanglish Inclusive Conjunction)";
+                semantic = "Conjunctive item demand marker";
+            } else if (cleanLower.endsWith("pannitaanga") || cleanLower.endsWith("pannittaanga") || cleanLower.endsWith("panniteenga")) {
+                root = "பண்ணு (pannu)";
+                pos = "Verb+Aspect";
+                suffix = "-ittaanga (Tanglish Completive Aspect)";
+                semantic = "Merchant or customer action completed";
+            } else if (cleanLower.endsWith("aachu") || cleanLower.endsWith("aachi")) {
+                root = "ஆகு (aachu)";
+                pos = "Past Verb";
+                suffix = "-aachu (Tanglish Completive Aspect)";
+                semantic = "Elapsed duration marker";
+            } else if (cleanLower.endsWith("ku") && cleanLower.length() > 3) {
+                root = cleanLower.substring(0, cleanLower.length() - 2);
+                pos = "Noun/Pronoun+Dative";
+                suffix = "-ku (Tanglish Dative)";
+                semantic = "Recipient, target, or time expectation boundary";
+            }
+            return new MorphologyToken(raw, root, pos, suffix, semantic);
+        }
 
         // Tier 1: Agglutinative Negation Suffixes
         if (clean.endsWith("மாட்றாங்க") || clean.endsWith("மாட்டாங்க")) {
@@ -395,40 +553,60 @@ public class TamilMorphologyService {
         String s = token.getSuffix() != null ? token.getSuffix() : "";
         String p = token.getPos() != null ? token.getPos() : "";
         String r = token.getRoot() != null ? token.getRoot() : "";
+        String t = token.getToken() != null ? token.getToken().toLowerCase() : "";
         return s.contains("Negative") || p.contains("Negative") || r.equals("வரல") || r.equals("ஆகல")
-                || r.equals("இல்லை") || r.equals("இல்ல") || r.equals("மாட்டு");
+                || r.equals("இல்லை") || r.equals("இல்ல") || r.equals("மாட்டு") || r.contains("varala")
+                || r.contains("aagala") || r.contains("kedaikala") || r.contains("edukala")
+                || r.contains("waste") || r.contains("worst") || r.contains("illa")
+                || t.contains("waste") || t.contains("worst") || t.contains("fraud");
+    }
+
+    public boolean isIrritationOrAngerMorpheme(MorphologyToken token) {
+        if (token == null) return false;
+        String r = token.getRoot() != null ? token.getRoot().toLowerCase() : "";
+        String t = token.getToken() != null ? token.getToken().toLowerCase() : "";
+        return r.contains("கடுப்பு") || r.contains("kaduppu") || r.contains("kadupa")
+                || r.contains("gaandu") || r.contains("காண்டு") || r.contains("எரிச்சல்")
+                || r.contains("கோபம்") || r.contains("kovam") || r.contains("kobam")
+                || r.contains("அடி") || t.contains("kadupa") || t.contains("kaduppa")
+                || t.contains("gaandu") || t.contains("erichal") || t.contains("worst")
+                || t.contains("fraud") || t.contains("cheat") || t.contains("scam");
     }
 
     public boolean isPraiseMorpheme(MorphologyToken token) {
         if (token == null) return false;
-        String r = token.getRoot() != null ? token.getRoot() : "";
-        String t = token.getToken() != null ? token.getToken() : "";
+        String r = token.getRoot() != null ? token.getRoot().toLowerCase() : "";
+        String t = token.getToken() != null ? token.getToken().toLowerCase() : "";
         return r.equals("சூப்பர்") || r.equals("நன்மை") || r.equals("அருமை") || r.equals("செமை")
-                || r.equals("மகிழ்ச்சி") || r.equals("நன்றி") || t.toLowerCase().contains("super")
-                || t.toLowerCase().contains("great") || t.toLowerCase().contains("thanks")
-                || t.toLowerCase().contains("excellent");
+                || r.equals("மகிழ்ச்சி") || r.equals("நன்றி") || r.contains("super") || r.contains("semma")
+                || r.contains("mass") || r.contains("nalla") || t.contains("super") || t.contains("great")
+                || t.contains("thanks") || t.contains("excellent") || t.contains("semma") || t.contains("vera level");
     }
 
     public boolean isEmphaticMorpheme(MorphologyToken token) {
         if (token == null) return false;
         String s = token.getSuffix() != null ? token.getSuffix() : "";
         String p = token.getPos() != null ? token.getPos() : "";
-        return s.contains("Emphatic") || p.contains("Emphatic") || s.contains("-ஏ");
+        String t = token.getToken() != null ? token.getToken().toLowerCase() : "";
+        return s.contains("Emphatic") || p.contains("Emphatic") || s.contains("-ஏ")
+                || s.contains("-vae") || s.contains("-ve") || t.endsWith("vae") || t.endsWith("ave");
     }
 
     public boolean isWaitingOrDelayMorpheme(MorphologyToken token) {
         if (token == null) return false;
         String r = token.getRoot() != null ? token.getRoot() : "";
-        String t = token.getToken() != null ? token.getToken() : "";
+        String t = token.getToken() != null ? token.getToken().toLowerCase() : "";
         return r.equals("காத்திரு") || r.equals("கா") || r.equals("நேரம்") || r.equals("மணி")
-                || r.equals("வாரம்") || t.contains("காத்திருக்க") || t.contains("மணி நேரம்");
+                || r.equals("வாரம்") || r.contains("aachu") || t.contains("காத்திருக்க")
+                || t.contains("மணி நேரம்") || t.contains("waiting") || t.contains("late")
+                || t.contains("delay") || t.contains("kaakka");
     }
 
     public boolean isCancellationMorpheme(MorphologyToken token) {
         if (token == null) return false;
-        String r = token.getRoot() != null ? token.getRoot() : "";
-        String t = token.getToken() != null ? token.getToken() : "";
-        return r.equals("கேன்சல்") || t.toLowerCase().contains("cancel");
+        String r = token.getRoot() != null ? token.getRoot().toLowerCase() : "";
+        String t = token.getToken() != null ? token.getToken().toLowerCase() : "";
+        return r.contains("கேன்சல்") || r.contains("cancel") || t.contains("cancel");
     }
 
     private static class TokenProfile {
